@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ZoomRoomsUpdated;
 use App\Models\ZoomReservation;
 use App\Support\TimeSlots;
 use Illuminate\Http\Request;
@@ -70,6 +71,10 @@ class ZoomReservationController extends Controller
             'room_number' => $validated['room_number'],
             'status' => 'mendatang',
         ]);
+
+        // Siarkan perubahan lewat Reverb supaya tabel breakout room di halaman
+        // Jadwal ter-update secara real time untuk semua pengguna yang sedang membukanya.
+        broadcast(new ZoomRoomsUpdated($reservation->id, $validated['tanggal']));
 
         return redirect()->route('zoom.success', $reservation->id);
     }

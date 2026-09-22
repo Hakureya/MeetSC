@@ -19,6 +19,8 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
-        "alpinejs": "^3.17.2"
+        "alpinejs": "^3.17.2",
+        "laravel-echo": "^2.5.0",
+        "pusher-js": "^8.6.0"
     }
 }

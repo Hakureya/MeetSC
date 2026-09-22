@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ZoomRoomsUpdated;
 use App\Models\AttendanceForm;
 use App\Models\RoomReservation;
 use App\Models\ZoomReservation;
@@ -58,6 +59,8 @@ class DashboardController extends Controller
                 'no_telp_pic' => $r->no_telp_pic,
                 'divisi_pic' => $r->divisi_pic,
                 'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                'broadcast' => null,
+                'zoom_link' => null,
             ]);
         }
 
@@ -78,6 +81,8 @@ class DashboardController extends Controller
                 'no_telp_pic' => $r->no_telp_pic,
                 'divisi_pic' => $r->divisi_pic,
                 'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                'broadcast' => $r->broadcast_text,
+                'zoom_link' => \App\Models\ZoomReservation::ZOOM_LINK,
             ]);
         }
 
@@ -151,6 +156,8 @@ class DashboardController extends Controller
                 'no_telp_pic' => $r->no_telp_pic,
                 'divisi_pic' => $r->divisi_pic,
                 'can_cancel' => true,
+                'broadcast' => null,
+                'zoom_link' => null,
             ]);
         }
 
@@ -181,6 +188,8 @@ class DashboardController extends Controller
                 'no_telp_pic' => $r->no_telp_pic,
                 'divisi_pic' => $r->divisi_pic,
                 'can_cancel' => true,
+                'broadcast' => $r->broadcast_text,
+                'zoom_link' => \App\Models\ZoomReservation::ZOOM_LINK,
             ]);
         }
 
@@ -386,6 +395,12 @@ class DashboardController extends Controller
         // Ruang gabungan: ikut ajukan pembatalan pada reservasi turunan di ruang komponennya.
         if ($request->type === 'room' && method_exists($reservation, 'childReservations')) {
             $reservation->childReservations()->update(['status' => 'menunggu_pembatalan']);
+        }
+
+        // Reservasi Zoom yang diajukan pembatalan tetap "memakai" ruangan sampai
+        // disetujui Admin, tapi statusnya berubah -- siarkan supaya tabel jadwal ikut update.
+        if ($request->type === 'zoom') {
+            broadcast(new ZoomRoomsUpdated($reservation->id, $reservation->tanggal->toDateString()));
         }
 
         return back()->with(

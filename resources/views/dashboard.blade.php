@@ -69,6 +69,8 @@
                             'no_telp_pic' => $r['no_telp_pic'],
                             'divisi_pic' => $r['divisi_pic'],
                             'created_at' => $r['created_at_label'],
+                            'broadcast' => $r['broadcast'],
+                            'zoom_link' => $r['zoom_link'],
                         ]))"
                         class="rounded-lg border border-slate-200 px-3.5 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
                     >
@@ -364,6 +366,10 @@
                                                                 'no_telp_pic' => $r['no_telp_pic'],
                                                                 'divisi_pic' => $r['divisi_pic'],
                                                                 'created_at' => $r['created_at_label'],
+                                                                'broadcast' => $r['broadcast'],
+                                                                'zoom_link' => $r['zoom_link'],
+                                                                'can_cancel' => $r['can_cancel'],
+                                                                'raw_id' => $r['raw_id'],
                                                             ]))"
                                                             class="block w-full px-4 py-2 text-left hover:bg-brand-50 hover:text-brand-600">
                                                         Lihat Detail
@@ -463,127 +469,43 @@
 </form>
 
 {{-- Modal Detail Reservasi Dashboard --}}
+{{-- Gaya kartu & seksi modal ini disamakan dengan modal Detail Reservasi
+     di halaman Semua Pemesanan (Admin), supaya tampilan detail konsisten
+     di Dashboard, Breakout Room Zoom, maupun Semua Pemesanan. --}}
 <div
     id="dashboardDetailModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+    class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-4"
     role="dialog"
     aria-modal="true"
     aria-labelledby="dashboardModalTitle"
 >
-    <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden border">
 
-        {{-- Header --}}
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        {{-- Header Modal --}}
+        <div class="flex justify-between items-center px-4 py-3 border-b bg-gray-50 shrink-0">
             <div>
-                <h3 id="dashboardModalTitle" class="text-lg font-bold text-slate-900">
-                    Detail Reservasi
-                </h3>
-                <p id="dashboardModalId" class="mt-1 text-xs text-slate-400"></p>
+                <h4 id="dashboardModalTitle" class="font-bold text-gray-800 text-sm">Detail Reservasi</h4>
+                <p id="dashboardModalId" class="mt-0.5 text-xs text-gray-400"></p>
             </div>
 
             <button
                 type="button"
                 onclick="closeDashboardDetail()"
-                class="text-2xl text-slate-400 hover:text-slate-600"
+                class="text-gray-400 hover:text-gray-600 text-xl leading-none"
                 aria-label="Tutup detail"
             >
                 &times;
             </button>
         </div>
 
-        {{-- Status --}}
-        <div class="py-4">
-            <span
-                id="dashboardModalStatus"
-                class="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-            ></span>
+        {{-- Body Modal (Scrollable) --}}
+        <div id="dashboardModalBody" class="px-4 py-3 overflow-y-auto flex-1 space-y-3">
+            <!-- Konten diisi lewat JS -->
         </div>
 
-        {{-- Informasi Reservasi --}}
-        <div class="space-y-4 text-sm">
-
-            <div>
-                <h4 class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Informasi Reservasi
-                </h4>
-
-                <div class="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Jenis</span>
-                        <span id="dashboardModalJenis" class="text-right font-semibold text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Ruangan / Platform</span>
-                        <span id="dashboardModalRuang" class="text-right font-semibold text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Tanggal</span>
-                        <span id="dashboardModalTanggal" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Waktu</span>
-                        <span id="dashboardModalWaktu" class="text-right text-slate-800"></span>
-                    </div>
-
-                    {{-- Baris ini hanya relevan untuk Ruang Rapat, disembunyikan untuk Zoom via JS --}}
-                    <div id="dashboardRowPeserta" class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Jumlah Peserta</span>
-                        <span id="dashboardModalPeserta" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div id="dashboardRowKonsumsi" class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Konsumsi</span>
-                        <span id="dashboardModalKonsumsi" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Nama PIC</span>
-                        <span id="dashboardModalPic" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">No. Telp PIC</span>
-                        <span id="dashboardModalTelpPic" class="text-right text-slate-800"></span>
-                    </div>
-
-                    {{-- Divisi PIC berlaku untuk reservasi Ruang Rapat maupun Breakout Room Zoom --}}
-                    <div id="dashboardRowDivisiPic" class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Divisi PIC</span>
-                        <span id="dashboardModalDivisiPic" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Keperluan / Agenda</span>
-                        <span id="dashboardModalKeperluan" class="max-w-[60%] text-right text-slate-800"></span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Informasi Pembuatan --}}
-            <div>
-                <h4 class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Informasi Pemesanan
-                </h4>
-
-                <div class="flex justify-between gap-4 rounded-lg border border-slate-100 p-3 text-sm">
-                    <span class="text-slate-500">Dibuat pada</span>
-                    <span id="dashboardModalCreated" class="text-right text-slate-800"></span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Footer --}}
-        <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
-            <button
-                type="button"
-                onclick="closeDashboardDetail()"
-                class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-            >
-                Tutup
-            </button>
+        {{-- Footer Modal --}}
+        <div id="dashboardModalActions" class="px-4 py-3 border-t bg-gray-50 shrink-0">
+            <!-- Tombol aksi diisi lewat JS -->
         </div>
     </div>
 </div>
@@ -708,42 +630,39 @@
         document.getElementById(id).textContent = value ?? '-';
     }
 
+    // Gaya kartu & seksi di bawah ini disamakan dengan modal Detail Reservasi
+    // pada halaman Semua Pemesanan (Admin).
+    const dashboardEscapeHtml = (str) => String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    const dashboardRow = (label, value) => {
+        if (value === null || value === undefined || value === '') return '';
+        return `
+            <div class="flex justify-between gap-2 py-1 border-b border-gray-100 last:border-0 text-[11px]">
+                <span class="text-gray-500 font-medium shrink-0">${label}</span>
+                <span class="font-semibold text-gray-800 text-right truncate">${dashboardEscapeHtml(value)}</span>
+            </div>
+        `;
+    };
+
+    const dashboardSection = (title, rowsHtml) => {
+        const filled = rowsHtml.filter(Boolean).join('');
+        if (!filled) return '';
+        return `
+            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs flex flex-col justify-between">
+                <div>
+                    <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">${title}</p>
+                    <div class="space-y-0.5">${filled}</div>
+                </div>
+            </div>
+        `;
+    };
+
     function openDashboardDetail(res) {
-        dashboardSetText('dashboardModalTitle', 'Detail Reservasi');
-        dashboardSetText('dashboardModalId', res.id);
-
-        dashboardSetText('dashboardModalJenis', res.jenis);
-        dashboardSetText('dashboardModalRuang', res.ruang);
-        dashboardSetText('dashboardModalTanggal', res.tanggal);
-        dashboardSetText('dashboardModalWaktu', res.waktu);
-
-        // Jumlah Peserta & Konsumsi hanya relevan untuk Ruang Rapat.
-        // Untuk Zoom, kedua baris ini disembunyikan supaya tidak menampilkan "-".
-        const isRoom = res.jenis_raw === 'room';
-
-        const rowPeserta = document.getElementById('dashboardRowPeserta');
-        const rowKonsumsi = document.getElementById('dashboardRowKonsumsi');
-
-        rowPeserta.classList.toggle('hidden', !isRoom);
-        rowKonsumsi.classList.toggle('hidden', !isRoom);
-
-        if (isRoom) {
-            dashboardSetText(
-                'dashboardModalPeserta',
-                res.jumlah_peserta ? res.jumlah_peserta + ' orang' : '-'
-            );
-            dashboardSetText('dashboardModalKonsumsi', res.konsumsi);
-        }
-
-        dashboardSetText('dashboardModalPic', res.nama_pic);
-        dashboardSetText('dashboardModalTelpPic', res.no_telp_pic);
-
-        // Divisi PIC kini terisi untuk reservasi Ruang Rapat maupun Breakout Room Zoom.
-        dashboardSetText('dashboardModalDivisiPic', res.divisi_pic);
-        dashboardSetText('dashboardModalKeperluan', res.keperluan);
-        dashboardSetText('dashboardModalCreated', res.created_at);
-
-        const status = document.getElementById('dashboardModalStatus');
+        document.getElementById('dashboardModalTitle').innerText = `Detail Reservasi ${res.id}`;
+        document.getElementById('dashboardModalId').textContent = '';
 
         const statusLabels = {
             mendatang: 'Mendatang',
@@ -752,18 +671,94 @@
             dibatalkan: 'Dibatalkan',
         };
 
-        const statusClasses = {
-            mendatang: 'bg-blue-100 text-blue-700',
-            selesai: 'bg-gray-100 text-gray-700',
-            menunggu_pembatalan: 'bg-amber-100 text-amber-700',
-            dibatalkan: 'bg-red-100 text-red-700',
-        };
+        const isRoom = res.jenis_raw === 'room';
 
-        status.textContent = statusLabels[res.status] ?? res.status;
+        const sections = [
+            dashboardSection('Informasi Reservasi', [
+                dashboardRow('Kode', res.id),
+                dashboardRow('Jenis', res.jenis),
+                dashboardRow('Ruangan / Platform', res.ruang),
+                dashboardRow('Tanggal', res.tanggal),
+                dashboardRow('Waktu', res.waktu),
+                // Jumlah Peserta & Konsumsi hanya relevan untuk Ruang Rapat.
+                isRoom ? dashboardRow('Peserta', res.jumlah_peserta ? res.jumlah_peserta + ' orang' : null) : '',
+                isRoom ? dashboardRow('Konsumsi', res.konsumsi) : '',
+                dashboardRow('Keperluan / Agenda', res.keperluan),
+            ]),
 
-        status.className =
-            'inline-flex rounded-full px-3 py-1 text-xs font-semibold ' +
-            (statusClasses[res.status] ?? 'bg-gray-100 text-gray-700');
+            dashboardSection('Penanggung Jawab', [
+                dashboardRow('Nama PIC', res.nama_pic),
+                dashboardRow('No. Telp PIC', res.no_telp_pic),
+                dashboardRow('Divisi PIC', res.divisi_pic),
+            ]),
+
+            dashboardSection('Pemesanan', [
+                dashboardRow('Status', statusLabels[res.status] ?? res.status),
+                dashboardRow('Dibuat', res.created_at),
+            ]),
+        ];
+
+        // Broadcast & Link Zoom — hanya untuk reservasi Breakout Room Zoom,
+        // supaya teks undangan + link Zoom bisa langsung disalin dari Dashboard.
+        const broadcastBlock = (res.jenis_raw === 'zoom' && res.broadcast) ? `
+            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs sm:col-span-2">
+                <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Broadcast &amp; Link Zoom</p>
+                <div id="dashboardBroadcastText" class="whitespace-pre-wrap rounded-md border border-gray-100 bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-700 select-all">${dashboardEscapeHtml(res.broadcast)}</div>
+                <button
+                    type="button"
+                    onclick="copyDashboardBroadcast()"
+                    id="dashboardCopyBroadcastBtn"
+                    class="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                >
+                    Salin Broadcast
+                </button>
+            </div>
+        ` : '';
+
+        document.getElementById('dashboardModalBody').innerHTML = `
+            <div class="mb-2">
+                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                    ${dashboardEscapeHtml(statusLabels[res.status] ?? res.status)}
+                </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                ${sections.join('')}
+                ${broadcastBlock}
+            </div>
+        `;
+
+        // Tombol menuju link Zoom — hanya untuk reservasi Breakout Room Zoom.
+        const zoomButtonHtml = (res.jenis_raw === 'zoom' && res.zoom_link) ? `
+            <a
+                href="${dashboardEscapeHtml(res.zoom_link)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full block text-center py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-bold text-xs transition-colors"
+            >
+                Menuju Link Zoom
+            </a>
+        ` : '';
+
+        // Ajukan Pembatalan — hanya untuk reservasi yang masih "mendatang" dan
+        // memang punya mekanisme pembatalan (Ruang Rapat / Breakout Room Zoom).
+        const canCancel = res.can_cancel && res.status === 'mendatang' && res.raw_id;
+        const cancelButtonHtml = canCancel ? `
+            <button
+                type="button"
+                onclick="closeDashboardDetail(); openCancelConfirm('${res.jenis_raw}', ${res.raw_id}, ${JSON.stringify(res.id)})"
+                class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
+            >
+                Ajukan Pembatalan
+            </button>
+        ` : '';
+
+        document.getElementById('dashboardModalActions').innerHTML = (zoomButtonHtml || cancelButtonHtml) ? `
+            <div class="flex flex-col gap-2">
+                ${zoomButtonHtml}
+                ${cancelButtonHtml}
+            </div>
+        ` : '';
 
         const modal = document.getElementById('dashboardDetailModal');
 
@@ -776,6 +771,48 @@
 
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+
+    // ------------------------------------------------------------------
+    // Salin Broadcast Zoom (dari modal Detail Reservasi Dashboard)
+    // ------------------------------------------------------------------
+    function copyDashboardBroadcast() {
+        const el = document.getElementById('dashboardBroadcastText');
+        const btn = document.getElementById('dashboardCopyBroadcastBtn');
+        if (!el || !btn) return;
+
+        const text = el.textContent;
+
+        function markCopied() {
+            btn.innerText = 'Berhasil Disalin!';
+            setTimeout(() => { btn.innerText = 'Salin Broadcast'; }, 2000);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(markCopied).catch(() => copyDashboardBroadcastFallback(text, markCopied));
+        } else {
+            copyDashboardBroadcastFallback(text, markCopied);
+        }
+    }
+
+    function copyDashboardBroadcastFallback(text, onSuccess) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            if (document.execCommand('copy')) {
+                onSuccess();
+            } else {
+                alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
+            }
+        } catch (e) {
+            alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
+        }
+        document.body.removeChild(textarea);
     }
 
     // ------------------------------------------------------------------

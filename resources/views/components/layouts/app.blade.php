@@ -4,6 +4,8 @@
     <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{-- Dipakai Laravel Echo untuk otorisasi channel private (lihat resources/js/echo.js). --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Dashboard' }} — MeetSC</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">

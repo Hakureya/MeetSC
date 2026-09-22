@@ -11,6 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withBroadcasting(
+        __DIR__.'/../routes/channels.php',
+        ['middleware' => ['web', 'auth']],
+    )
     ->withMiddleware(function (Middleware $middleware): void {
         // Sinkronkan status reservasi kedaluwarsa (mendatang -> selesai) di setiap
         // halaman web dibuka, karena tidak ada scheduler/cron terpisah yang berjalan.

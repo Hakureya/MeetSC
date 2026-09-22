@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\ZoomRoomsUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceForm;
 use App\Models\RoomReservation;
@@ -61,6 +62,8 @@ class ReservationManagementController extends Controller
                 'created_at' => $item->created_at,
                 'dibuat' => $item->created_at->translatedFormat('d F Y, H:i') . ' WIB',
                 'can_cancel' => true,
+                'broadcast' => null,
+                'zoom_link' => null,
                 'raw_item' => $item,
             ];
         });
@@ -92,6 +95,8 @@ class ReservationManagementController extends Controller
                 'created_at' => $item->created_at,
                 'dibuat' => $item->created_at->translatedFormat('d F Y, H:i') . ' WIB',
                 'can_cancel' => true,
+                'broadcast' => $item->broadcast_text,
+                'zoom_link' => \App\Models\ZoomReservation::MEETING_URL,
                 'raw_item' => $item,
             ];
         });
@@ -128,6 +133,8 @@ class ReservationManagementController extends Controller
                 'created_at' => $item->created_at,
                 'dibuat' => $item->created_at->translatedFormat('d F Y, H:i') . ' WIB',
                 'can_cancel' => false,
+                'broadcast' => null,
+                'zoom_link' => null,
                 'raw_item' => $item,
             ];
         })->when($status, fn ($collection) => $collection->where('status', $status));
@@ -209,6 +216,12 @@ class ReservationManagementController extends Controller
         }
 
         $res->update(['status' => 'dibatalkan']);
+
+        // Ruangan yang dibatalkan Admin jadi kosong lagi -- siarkan supaya tabel
+        // jadwal breakout room Zoom ter-update seketika untuk pengguna yang membukanya.
+        if ($type === 'Zoom') {
+            broadcast(new ZoomRoomsUpdated($res->id, $res->tanggal->toDateString()));
+        }
 
         return back()->with('success', 'Reservasi berhasil dibatalkan oleh Admin.');
     }

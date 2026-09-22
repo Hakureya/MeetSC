@@ -323,6 +323,28 @@ function openDetailModal(res) {
         ])
     ];
 
+    // Broadcast & Link Zoom — hanya untuk reservasi Breakout Room Zoom, supaya
+    // Admin bisa melihat/menyalin lagi teks broadcast + link Zoom dari riwayat.
+    const escapeHtml = (str) => String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+    const broadcastBlock = (res.jenis === 'Zoom' && res.broadcast) ? `
+        <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs sm:col-span-2">
+            <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Broadcast &amp; Link Zoom</p>
+            <div id="modalBroadcastText" class="whitespace-pre-wrap rounded-md border border-gray-100 bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-700 select-all">${escapeHtml(res.broadcast)}</div>
+            <button
+                type="button"
+                onclick="copyAdminBroadcast()"
+                id="adminCopyBroadcastBtn"
+                class="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
+            >
+                Salin Broadcast
+            </button>
+        </div>
+    ` : '';
+
     document.getElementById('modalBody').innerHTML = `
         <div class="mb-2">
             <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
@@ -332,6 +354,7 @@ function openDetailModal(res) {
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             ${sections.join('')}
+            ${broadcastBlock}
         </div>
     `;
 
@@ -342,18 +365,37 @@ function openDetailModal(res) {
     // begitu pula pemesanan yang memang tidak punya mekanisme pembatalan (Form Kehadiran).
     const canCancel = res.can_cancel && res.status !== 'dibatalkan' && res.status !== 'selesai';
 
-    if (canCancel) {
+    // Tombol menuju link Zoom — hanya untuk reservasi Breakout Room Zoom.
+    const zoomButtonHtml = (res.jenis === 'Zoom' && res.zoom_link) ? `
+        <a
+            href="${escapeHtml(res.zoom_link)}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-full block text-center py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-bold text-xs transition-colors"
+        >
+            Menuju Link Zoom
+        </a>
+    ` : '';
+
+    const cancelFormHtml = canCancel ? `
+        <form action="/semua-pemesanan/batalkan/${res.jenis}/${res.raw_id}" method="POST" class="w-full">
+            <input type="hidden" name="_token" value="${csrfToken}">
+            <button 
+                type="submit" 
+                onclick="return confirm('Apakah Anda yakin ingin membatalkan reservasi ini?')"
+                class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
+            >
+                Batalkan Reservasi
+            </button>
+        </form>
+    ` : '';
+
+    if (zoomButtonHtml || cancelFormHtml) {
         actionContainer.innerHTML = `
-            <form action="/semua-pemesanan/batalkan/${res.jenis}/${res.raw_id}" method="POST" class="w-full">
-                <input type="hidden" name="_token" value="${csrfToken}">
-                <button 
-                    type="submit" 
-                    onclick="return confirm('Apakah Anda yakin ingin membatalkan reservasi ini?')"
-                    class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
-                >
-                    Batalkan Reservasi
-                </button>
-            </form>
+            <div class="flex flex-col gap-2">
+                ${zoomButtonHtml}
+                ${cancelFormHtml}
+            </div>
         `;
     }
 
@@ -366,6 +408,48 @@ function closeDetailModal() {
     const modal = document.getElementById('detailModal');
     modal.classList.add('hidden');
     modal.classList.remove('flex');
+}
+
+// ------------------------------------------------------------------
+// Salin Broadcast Zoom (dari modal Detail Reservasi Admin)
+// ------------------------------------------------------------------
+function copyAdminBroadcast() {
+    const el = document.getElementById('modalBroadcastText');
+    const btn = document.getElementById('adminCopyBroadcastBtn');
+    if (!el || !btn) return;
+
+    const text = el.textContent;
+
+    function markCopied() {
+        btn.innerText = 'Berhasil Disalin!';
+        setTimeout(() => { btn.innerText = 'Salin Broadcast'; }, 2000);
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(markCopied).catch(() => copyAdminBroadcastFallback(text, markCopied));
+    } else {
+        copyAdminBroadcastFallback(text, markCopied);
+    }
+}
+
+function copyAdminBroadcastFallback(text, onSuccess) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+        if (document.execCommand('copy')) {
+            onSuccess();
+        } else {
+            alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
+        }
+    } catch (e) {
+        alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
+    }
+    document.body.removeChild(textarea);
 }
 
 document.getElementById('detailModal').addEventListener('click', function(event) {

@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\MyReservationsController;
 use App\Http\Controllers\RoomReservationController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ZoomReservationController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,7 +58,11 @@ Route::middleware('auth')->group(function () {
     | Tab 3: Reservasi Link Zoom
     |----------------------------------------------------------------------
     */
-    Route::get('/link-zoom', [ZoomReservationController::class, 'index'])->name('zoom.index');
+    // Menu "Breakout Room Zoom" = jadwal breakout room hari ini. Form pemesanan (dulu di sini)
+    // dipindah ke /link-zoom/buat dan dituju dari tombol "Buat Reservasi" pada halaman jadwal.
+    Route::get('/link-zoom', [ScheduleController::class, 'index'])->name('zoom.index');
+    Route::get('/link-zoom/data', [ScheduleController::class, 'data'])->name('zoom.data');
+    Route::get('/link-zoom/buat', [ZoomReservationController::class, 'index'])->name('zoom.create');
     Route::get('/link-zoom/ketersediaan', [ZoomReservationController::class, 'getAvailability'])->name('zoom.availability');
     Route::post('/link-zoom', [ZoomReservationController::class, 'store'])->name('zoom.store');
     Route::get('/link-zoom/sukses/{id}', [ZoomReservationController::class, 'success'])->name('zoom.success');

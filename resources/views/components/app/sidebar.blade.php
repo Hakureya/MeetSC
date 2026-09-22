@@ -1,6 +1,6 @@
 @php
     $navItems = [
-        ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'home'],
+        ['route' => 'dashboard', 'label' => 'Dashboard', 'icon' => 'home', 'match' => ['dashboard', 'dashboard.*']],
         ['route' => 'rooms.index', 'label' => 'Ruang Rapat', 'icon' => 'calendar'],
         ['route' => 'zoom.index', 'label' => 'Breakout Room Zoom', 'icon' => 'link'],
         ['route' => 'attendance.index', 'label' => 'Form Kehadiran', 'icon' => 'clipboard'],
@@ -56,7 +56,7 @@
 
     <nav class="mt-8 flex flex-1 flex-col gap-1">
         @foreach ($navItems as $item)
-            @php $active = request()->routeIs($item['route']); @endphp
+            @php $active = request()->routeIs(...($item['match'] ?? [$item['route']])); @endphp
             <a href="{{ route($item['route']) }}"
                title="{{ $item['label'] }}"
                :class="collapsed ? 'justify-center' : 'justify-start'"

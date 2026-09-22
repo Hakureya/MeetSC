@@ -1,7 +1,19 @@
 <x-layouts.app title="Reservasi Link Zoom">
 <div class="max-w-2xl mx-auto py-8 px-4">
     <div class="bg-white border rounded-2xl p-6 shadow-sm">
-        <h2 class="text-xl font-bold text-gray-800 mb-6 pb-2 border-b">Reservasi Breakout Room Zoom</h2>
+        <!-- Header dengan tombol navigasi ke zoom.index -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Reservasi Breakout Room Zoom</h2>
+                <p class="text-xs text-gray-500 mt-0.5">Pilih rentang slot waktu dan breakout room yang tersedia.</p>
+            </div>
+            <a 
+                href="{{ route('zoom.index') }}" 
+                class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 hover:text-emerald-700 border border-gray-200 rounded-lg transition duration-150 shadow-xs shrink-0"
+            >
+                <span>Kembali ke Daftar Reservasi</span>
+            </a>
+        </div>
 
         @if ($errors->any())
             <div class="mb-4 rounded-lg border border-busy-border bg-busy-bg px-4 py-3 text-sm text-busy-text">
@@ -17,7 +29,14 @@
 
             <div class="mb-4">
                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Agenda</label>
-                <input type="text" name="nama_agenda" value="{{ old('nama_agenda') }}" required placeholder="Contoh: Rapat Evaluasi Kerja" class="w-full border-gray-300 rounded-lg text-sm">
+                <input 
+                    type="text" 
+                    name="nama_agenda" 
+                    value="{{ old('nama_agenda') }}" 
+                    required 
+                    placeholder="Contoh: Rapat Evaluasi Kerja" 
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
             </div>
 
             <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -66,8 +85,6 @@
 </div>
 
 <script>
-// 15 slot waktu. Setiap slot punya label tampilan serta jam mulai/selesai yang dikirim ke server.
-// Seluruh slot bebas dipilih, termasuk rentang yang melewati jam makan siang.
 const slots = @json(\App\Support\TimeSlots::all());
 const totalZoomSlots = slots.length;
 
@@ -140,8 +157,6 @@ function resetZoomSelection() {
 
 function handleTimeSelect(idx) {
     if (pendingZoomStart === null) {
-        // Klik pertama: satu slot (30 menit) langsung sah dipesan.
-        // Klik berikutnya pada slot lain akan memperluasnya menjadi rentang.
         pendingZoomStart = idx;
         selectedTime = [idx, idx];
 
@@ -154,7 +169,6 @@ function handleTimeSelect(idx) {
     }
 
     if (idx === pendingZoomStart) {
-        // Klik ulang slot yang sama: batalkan pilihan.
         resetZoomSelection();
         refreshRooms();
         return;
