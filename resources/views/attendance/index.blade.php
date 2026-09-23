@@ -34,7 +34,7 @@
                         <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">
                             Divisi PIC <span class="text-red-500">*</span>
                         </label>
-                        <input type="text" name="divisi_pic" value="{{ old('divisi_pic') }}" required placeholder="Contoh: Renbis" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <input type="text" name="divisi_pic" value="{{ old('divisi_pic') }}" required placeholder="Contoh: Perencanaan dan Bisnis" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     </div>
                 </div>
                 <div class="mb-4">

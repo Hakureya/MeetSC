@@ -71,7 +71,7 @@
                             type="text" 
                             name="divisi_pic" 
                             value="{{ old('divisi_pic') }}" 
-                            placeholder="Contoh: Renbis" 
+                            placeholder="Contoh: Perencanaan dan Bisnis" 
                             required
                             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                         >

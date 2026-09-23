@@ -73,7 +73,7 @@
                     name="divisi_pic" 
                     value="{{ old('divisi_pic') }}" 
                     required 
-                    placeholder="Contoh: Renbis" 
+                    placeholder="Contoh: Perencanaan dan Bisnis" 
                     class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 >
                 <p class="text-[11px] text-gray-400 mt-1">Divisi atau unit kerja penanggung jawab rapat.</p>

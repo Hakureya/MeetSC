@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@plnsc.co.id',
             'password' => Hash::make('password'),
             'nip' => '123456',
-            'divisi' => 'Renbis',
-            'jabatan' => 'Anak Magang',
+            'divisi' => 'Perencanaan dan Bisnis',
+            'jabatan' => 'Staff',
             'role' => 'admin',
             'status' => 'aktif',
         ]);

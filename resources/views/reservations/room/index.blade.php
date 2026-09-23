@@ -3,7 +3,7 @@
     {{-- Header & Filter Tanggal --}}
         <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
             <div>
-                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Daftar Ruang Rapat Hari Ini</h1>
+                <h1 class="text-2xl font-extrabold text-slate-900">Daftar Ruang Rapat Hari Ini</h1>
                 <p class="mt-1 text-sm text-slate-500">
                     Lihat jadwal dan status ketersediaan ruangan rapat.
                 </p>
