@@ -13,10 +13,10 @@ class DatabaseSeeder extends Seeder
     {
         // Akun admin
         $admin = User::create([
-            'name' => 'Arif Budiono',
+            'name' => 'Admin',
             'email' => 'admin@plnsc.co.id',
             'password' => Hash::make('password'),
-            'nip' => '2331165',
+            'nip' => '123456',
             'divisi' => 'Renbis',
             'jabatan' => 'Anak Magang',
             'role' => 'admin',

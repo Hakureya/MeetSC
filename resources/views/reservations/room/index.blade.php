@@ -1,15 +1,22 @@
 <x-layouts.app title="Ruang Meeting">
 <div class="max-w-6xl mx-auto py-8 px-4">
-    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
+    {{-- Header & Filter Tanggal --}}
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
             <div>
-                <h1 class="text-xl font-bold text-slate-900">Daftar Ruang Rapat Hari Ini</h1>
-                <p class="text-sm text-slate-500">Lihat jadwal dan status ketersediaan ruangan rapat hari ini di kantor PLN Suku Cadang</p>
+                <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Daftar Ruang Rapat Hari Ini</h1>
+                <p class="mt-1 text-sm text-slate-500">
+                    Lihat jadwal dan status ketersediaan ruangan rapat hari ini di kantor PLN Suku Cadang.
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-2 self-start sm:self-center bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+                <span class="pl-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tanggal:</span>
+                <input type="date" 
+                       value="{{ $selectedDate }}" 
+                       onchange="window.location.href='?tanggal='+this.value"
+                       class="border-0 bg-slate-50 text-slate-800 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-500 cursor-pointer py-1.5 px-3">
             </div>
         </div>
-        <input type="date" value="{{ $selectedDate }}" onchange="window.location.href='?tanggal='+this.value"
-               class="border-gray-300 rounded-lg text-sm shadow-sm focus:ring-brand-500 focus:border-brand-500">
-    </div>
 
     @foreach ([1 => 'Lantai 1', 2 => 'Lantai 2', 3 => 'Lantai 3'] as $floor => $floorName)
         @php $floorRooms = $rooms->where('floor', $floor); @endphp

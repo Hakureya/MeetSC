@@ -11,7 +11,7 @@
     @if($errors->any())
         <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl text-sm shadow-sm">
             <ul class="list-disc list-inside space-y-1">
-                @foreach($errors->all() as $error)
+                @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
@@ -42,9 +42,11 @@
     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-5">
         <form method="GET" action="{{ route('users.index') }}" class="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
             <div class="relative w-full sm:w-64">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Cari ID / nama / NIP..." class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500 shadow-sm">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Cari ID / nama / NIP..."
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
             </div>
-            <select name="filter" onchange="this.form.submit()" class="border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500 shadow-sm">
+            <select name="filter" onchange="this.form.submit()"
+                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                 <option value="">Semua Status & Role</option>
                 <option value="Aktif" {{ request('filter') === 'Aktif' ? 'selected' : '' }}>Aktif</option>
                 <option value="Nonaktif" {{ request('filter') === 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
@@ -76,7 +78,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
-                    @forelse($users as $u)
+                    @forelse ($users as $u)
                         <tr class="hover:bg-gray-50/80 transition">
                             <td class="p-3.5">
                                 <div class="font-bold text-gray-900">{{ $u->name }}</div>
@@ -130,14 +132,14 @@
                                                 </button>
                                             </div>
                                             <div class="py-1">
-                                                @unless ($u->id === auth()->id())
+                                                @if($u->id !== auth()->id())
                                                     <form action="{{ route('users.toggle', $u->id) }}" method="POST">
                                                         @csrf
                                                         <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-gray-700 transition">
                                                             {{ $u->status === 'aktif' ? 'Nonaktifkan User' : 'Aktifkan User' }}
                                                         </button>
                                                     </form>
-                                                @endunless
+                                                @endif
                                                 <button type="button" onclick='openResetPasswordModal(@json($u))' class="w-full text-left px-4 py-2 hover:bg-gray-50 text-amber-600 transition">
                                                     Reset Password
                                                 </button>
@@ -176,30 +178,33 @@
 </div>
 
 <!-- Modal 1: Tambah User Baru -->
-<div id="modalAddUser" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
-        <div class="flex justify-between items-center border-b pb-3 mb-4">
+<div id="modalAddUser" class="fixed inset-0 bg-gray-900/40 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4 transition-opacity">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100">
+        <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
             <h3 class="font-bold text-gray-800 text-base">Tambah User Baru</h3>
-            <button type="button" onclick="document.getElementById('modalAddUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            <button type="button" onclick="document.getElementById('modalAddUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">&times;</button>
         </div>
-        <form action="{{ route('users.store') }}" method="POST" class="space-y-3.5 text-sm">
+        <form action="{{ route('users.store') }}" method="POST" class="space-y-4 text-sm">
             @csrf
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Lengkap</label>
-                <input type="text" name="name" required placeholder="Nama user" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                <input type="text" name="name" required placeholder="Nama user"
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Email</label>
-                <input type="email" name="email" required placeholder="user@perusahaan.co.id" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+                <input type="email" name="email" required placeholder="user@perusahaan.co.id"
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">NIP / NIM</label>
-                    <input type="text" name="nip" required placeholder="198xxxxx" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">NIP / NIM</label>
+                    <input type="text" name="nip" required placeholder="198xxxxx"
+                           class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Role</label>
-                    <select name="role" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Role</label>
+                    <select name="role" class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                     </select>
@@ -207,36 +212,39 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Divisi / Unit</label>
-                    <input type="text" name="divisi" required placeholder="Contoh: PDSI" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi / Unit</label>
+                    <input type="text" name="divisi" required placeholder="Contoh: PDSI"
+                           class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Jabatan</label>
-                    <input type="text" name="jabatan" required placeholder="Contoh: Staff" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Jabatan</label>
+                    <input type="text" name="jabatan" required placeholder="Contoh: Staff"
+                           class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Password Awal</label>
-                <input type="password" name="password" required placeholder="Minimal 6 karakter" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Password Awal</label>
+                <input type="password" name="password" required placeholder="Minimal 6 karakter"
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
-            <div class="pt-3 flex gap-2">
-                <button type="button" onclick="document.getElementById('modalAddUser').classList.add('hidden')" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium">Batal</button>
-                <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition">Simpan User</button>
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="document.getElementById('modalAddUser').classList.add('hidden')" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 font-medium transition">Batal</button>
+                <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow transition">Simpan User</button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal 2: Detail Akun Pengguna -->
-<div id="modalDetailUser" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
-        <div class="flex justify-between items-center border-b pb-3 mb-4">
+<div id="modalDetailUser" class="fixed inset-0 bg-gray-900/40 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4 transition-opacity">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100">
+        <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
             <h3 class="font-bold text-gray-800 text-base">Detail Akun Pengguna</h3>
-            <button type="button" onclick="document.getElementById('modalDetailUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            <button type="button" onclick="document.getElementById('modalDetailUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">&times;</button>
         </div>
-        <div id="detailUserContent" class="space-y-2.5 text-sm text-gray-700"></div>
-        <div class="mt-6 pt-3 border-t">
-            <button type="button" onclick="document.getElementById('modalDetailUser').classList.add('hidden')" class="w-full py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition">
+        <div id="detailUserContent" class="space-y-3 text-sm text-gray-700"></div>
+        <div class="mt-6 pt-3 border-t border-gray-100">
+            <button type="button" onclick="document.getElementById('modalDetailUser').classList.add('hidden')" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full font-semibold transition">
                 Tutup
             </button>
         </div>
@@ -244,31 +252,34 @@
 </div>
 
 <!-- Modal 3: Edit User -->
-<div id="modalEditUser" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
-        <div class="flex justify-between items-center border-b pb-3 mb-4">
+<div id="modalEditUser" class="fixed inset-0 bg-gray-900/40 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4 transition-opacity">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100">
+        <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
             <h3 class="font-bold text-gray-800 text-base">Edit Akun Pengguna</h3>
-            <button type="button" onclick="document.getElementById('modalEditUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            <button type="button" onclick="document.getElementById('modalEditUser').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">&times;</button>
         </div>
-        <form id="formEditUser" method="POST" class="space-y-3.5 text-sm">
+        <form id="formEditUser" method="POST" class="space-y-4 text-sm">
             @csrf
             @method('PUT')
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Lengkap</label>
-                <input type="text" name="name" id="edit_name" required class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                <input type="text" name="name" id="edit_name" required
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Email</label>
-                <input type="email" name="email" id="edit_email" required class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+                <input type="email" name="email" id="edit_email" required
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">NIP / NIM</label>
-                    <input type="text" name="nip" id="edit_nip" required class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">NIP / NIM</label>
+                    <input type="text" name="nip" id="edit_nip" required
+                           class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Role</label>
-                    <select name="role" id="edit_role" class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Role</label>
+                    <select name="role" id="edit_role" class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                     </select>
@@ -276,49 +287,52 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Divisi / Unit</label>
-                    <input type="text" name="divisi" id="edit_divisi" required class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi / Unit</label>
+                    <input type="text" name="divisi" id="edit_divisi" required
+                           class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Jabatan</label>
-                    <input type="text" name="jabatan" id="edit_jabatan" required class="w-full border-gray-300 rounded-lg text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Jabatan</label>
+                    <input type="text" name="jabatan" id="edit_jabatan" required
+                           class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
-            <div class="pt-3 flex gap-2">
-                <button type="button" onclick="document.getElementById('modalEditUser').classList.add('hidden')" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium">Batal</button>
-                <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition">Simpan Perubahan</button>
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="document.getElementById('modalEditUser').classList.add('hidden')" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 font-medium transition">Batal</button>
+                <button type="submit" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow transition">Simpan Perubahan</button>
             </div>
         </form>
     </div>
 </div>
 
-<div id="modalResetPassword" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100">
-        <div class="flex justify-between items-center border-b pb-3 mb-4">
+<!-- Modal 4: Reset Password -->
+<div id="modalResetPassword" class="fixed inset-0 bg-gray-900/40 backdrop-blur-xs z-50 flex items-center justify-center hidden p-4 transition-opacity">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100">
+        <div class="flex justify-between items-center pb-4 mb-4 border-b border-gray-100">
             <h3 class="font-bold text-gray-800 text-base">Reset Password</h3>
-            <button type="button" onclick="document.getElementById('modalResetPassword').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg">&times;</button>
+            <button type="button" onclick="document.getElementById('modalResetPassword').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg leading-none">&times;</button>
         </div>
         <p class="mb-4 text-sm text-gray-500">
             Masukkan password baru untuk <span id="reset_password_user_name" class="font-semibold text-gray-800"></span>.
         </p>
-        <form id="formResetPassword" method="POST" class="space-y-3.5 text-sm">
+        <form id="formResetPassword" method="POST" class="space-y-4 text-sm">
             @csrf
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Password Baru</label>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Password Baru</label>
                 <input type="password" name="password" id="reset_password" required minlength="6"
                        placeholder="Minimal 6 karakter"
-                       class="w-full border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div>
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Konfirmasi Password Baru</label>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Konfirmasi Password Baru</label>
                 <input type="password" name="password_confirmation" id="reset_password_confirmation" required minlength="6"
                        placeholder="Ulangi password baru"
-                       class="w-full border-gray-300 rounded-lg text-sm focus:ring-amber-500 focus:border-amber-500">
+                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <p id="reset_password_error" class="hidden text-xs font-semibold text-red-600"></p>
-            <div class="pt-3 flex gap-2">
-                <button type="button" onclick="document.getElementById('modalResetPassword').classList.add('hidden')" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium">Batal</button>
-                <button type="submit" class="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow transition">Simpan Password</button>
+            <div class="pt-4 flex gap-3">
+                <button type="button" onclick="document.getElementById('modalResetPassword').classList.add('hidden')" class="w-1/2 py-2.5 border border-gray-300 text-gray-700 rounded-full hover:bg-gray-50 font-medium transition">Batal</button>
+                <button type="submit" class="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-full shadow transition">Simpan Password</button>
             </div>
         </form>
     </div>
@@ -331,7 +345,7 @@ function showUserDetail(user) {
     }) : '-';
 
     document.getElementById('detailUserContent').innerHTML = `
-        <div class="flex items-center gap-2 mb-3 pb-2 border-b">
+        <div class="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
             <span class="w-2.5 h-2.5 rounded-full ${user.status === 'aktif' ? 'bg-emerald-500' : 'bg-red-500'}"></span>
             <span class="font-bold ${user.status === 'aktif' ? 'text-emerald-700' : 'text-red-700'}">${user.status === 'aktif' ? 'Aktif' : 'Nonaktif'}</span>
         </div>

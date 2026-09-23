@@ -217,14 +217,6 @@
     <div class="sch-layout">
         {{-- ================= Tabel Ruangan ================= --}}
         <section id="schBoard" class="sch-board" aria-label="Tabel breakout room Zoom jadwal hari ini">
-            <div class="sch-head">
-                <div class="sch-head-title">
-                    <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5.5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-                    Tabel Ruangan (Jadwal Hari Ini)
-                </div>
-                <span class="sch-pill" title="Tabel otomatis berganti ke jadwal hari baru saat lewat tengah malam">Reset Harian Aktif</span>
-            </div>
-
             <div class="sch-scroll">
                 <div class="sch-table" role="table">
                     <div class="sch-cols" role="row">
@@ -269,58 +261,34 @@
 
         <div class="kiosk-body">
             <div class="kiosk-col">
-                <div class="kiosk-card">
-                    <div class="kiosk-guide-head">
-                        <span class="kiosk-guide-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M15 10.5 20 7v10l-5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><rect x="3" y="6" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/></svg></span>
+                <div class="kiosk-card flex flex-col h-full">
+                    {{-- Header / Judul Tetap Ada --}}
+                    <div class="kiosk-guide-head shrink-0">
+                        <span class="kiosk-guide-icon" style="background: transparent; padding: 0;">
+                            <img 
+                                src="{{ asset('storage/images/zoom-icon.png') }}" 
+                                alt="Zoom Icon" 
+                                style="width: 100%; height: 100%; object-fit: contain;"
+                            >
+                        </span>
                         <div>
                             <h2>Panduan Breakout Room</h2>
-                            <p>Ikuti 3 tahapan visual di bawah ini</p>
+                            <p>Ikuti tahapan visual di bawah ini</p>
                         </div>
                     </div>
 
-                    <div class="kiosk-steps">
-                        <div class="kiosk-step">
-                            <div class="kiosk-step-head">
-                                <span class="kiosk-num">1</span>
-                                <div>
-                                    <b>KLIK MENU BREAKOUT ROOMS</b>
-                                    <span>Perhatikan bilah menu bawah pada aplikasi Zoom Anda, kemudian klik ikon 4 kotak bertuliskan <b>Breakout Rooms</b>.</span>
-                                </div>
-                            </div>
-                            <div class="kiosk-mockbar">
-                                <span class="kiosk-mockbtn"><i></i>Mute</span>
-                                <span class="kiosk-mockbtn"><i></i>Video</span>
-                                <span class="kiosk-mockbtn"><i></i>Chat</span>
-                                <span class="kiosk-mockbtn active"><span class="breakout-box"><span class="kiosk-grid4"><span></span><span></span><span></span><span></span></span></span>Breakout</span>
-                            </div>
-                        </div>
-
-                        <div class="kiosk-step">
-                            <div class="kiosk-step-head">
-                                <span class="kiosk-num">2</span>
-                                <div>
-                                    <b>PILIH ROOM SESUAI JADWAL</b>
-                                    <span>Jendela pop-up daftar room akan muncul. Arahkan kursor pada nama ruangan sesuai jadwal Anda di tabel sebelah kanan.</span>
-                                </div>
-                            </div>
-                            <div class="kiosk-mockpopup">
-                                <div class="kiosk-mockroom">Room 01 <span class="cnt">(4 orang)</span></div>
-                                <div class="kiosk-mockroom hl">Room 02 <span class="kiosk-mockjoin">Join</span></div>
-                            </div>
-                        </div>
-
-                        <div class="kiosk-step">
-                            <div class="kiosk-step-head">
-                                <span class="kiosk-num">3</span>
-                                <div>
-                                    <b>KLIK "JOIN" &amp; MASUK</b>
-                                    <span>Klik tombol warna biru <b>Join</b> di sebelah kanan nama room. Layar akan langsung beralih ke sesi privat.</span>
-                                </div>
-                            </div>
-                        </div>
+                    {{-- Pengganti Langkah-langkah: Gambar Panduan --}}
+                    <div class="mt-3 flex-1 min-h-0 flex items-center justify-center overflow-hidden">
+                        <img 
+                            src="{{ asset('storage/images/panduan-breakout.jpeg') }}" 
+                            alt="Panduan Bergambar Masuk Breakout Room Zoom" 
+                            class="w-full h-full max-h-[58vh] object-contain rounded-xl border border-slate-200 shadow-sm"
+                            loading="lazy"
+                        >
                     </div>
 
-                    <div class="kiosk-note">
+                    {{-- Catatan Tambahan di Bawah --}}
+                    <div class="kiosk-note shrink-0 mt-3">
                         <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
                         <p><b>Catatan:</b> Jika tombol <i>Breakout Rooms</i> tidak terlihat, klik opsi <b>More (…)</b> di kanan bawah layar Zoom Anda.</p>
                     </div>
@@ -329,13 +297,8 @@
 
             <div class="kiosk-col">
                 <div class="kiosk-card">
-                    <div class="kiosk-table-head">
-                        <div>
-                            <h2>Daftar Sesi Pembagian Ruang</h2>
-                            <p>Silakan sesuaikan ruangan Anda dengan topik agenda berikut</p>
-                        </div>
-                        <span class="kiosk-total" id="kioskTotal">Total: - Ruangan</span>
-                    </div>
+                    {{-- Elemen tersembunyi agar JavaScript tidak error //yang bikin jamnya jalan kioskTotal--}} 
+                    <span id="kioskTotal" style="display: none;"></span>
 
                     <div class="kiosk-cols">
                         <div>Room</div>
@@ -355,9 +318,6 @@
 </div>
 
 {{-- ================= Modal Detail ================= --}}
-{{-- Gaya kartu & seksi modal ini disamakan dengan modal Detail Reservasi
-     di halaman Semua Pemesanan (Admin), supaya tampilan detail konsisten
-     di Dashboard, Breakout Room Zoom, maupun Semua Pemesanan. --}}
 <div id="schModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="schModalTitle">
     <div class="sch-modal-card bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden border">
 

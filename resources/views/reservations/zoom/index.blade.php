@@ -1,7 +1,6 @@
 <x-layouts.app title="Reservasi Link Zoom">
 <div class="max-w-2xl mx-auto py-8 px-4">
     <div class="bg-white border rounded-2xl p-6 shadow-sm">
-        <!-- Header dengan tombol navigasi ke zoom.index -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-gray-100">
             <div>
                 <h2 class="text-xl font-bold text-gray-800">Reservasi Breakout Room Zoom</h2>
@@ -27,6 +26,7 @@
             <input type="hidden" name="jam_selesai" id="inputZoomSelesai">
             <input type="hidden" name="room_number" id="inputZoomRoom">
 
+            <!-- NAMA AGENDA -->
             <div class="mb-4">
                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Agenda</label>
                 <input 
@@ -39,34 +39,68 @@
                 >
             </div>
 
+            <!-- NAMA PIC & NO TELP -->
             <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama PIC</label>
-                    <input type="text" name="nama_pic" value="{{ old('nama_pic') }}" required placeholder="Nama penanggung jawab rapat" class="w-full border-gray-300 rounded-lg text-sm">
+                    <input 
+                        type="text" 
+                        name="nama_pic" 
+                        value="{{ old('nama_pic') }}" 
+                        required 
+                        placeholder="Nama penanggung jawab rapat" 
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    >
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">No. Telpon PIC</label>
-                    <input type="tel" name="no_telp_pic" value="{{ old('no_telp_pic') }}" required placeholder="Contoh: 081234567890" class="w-full border-gray-300 rounded-lg text-sm">
+                    <input 
+                        type="tel" 
+                        name="no_telp_pic" 
+                        value="{{ old('no_telp_pic') }}" 
+                        required 
+                        placeholder="Contoh: 081234567890" 
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    >
                 </div>
             </div>
 
+            <!-- DIVISI PIC -->
             <div class="mb-4">
                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Divisi PIC</label>
-                <input type="text" name="divisi_pic" value="{{ old('divisi_pic') }}" required placeholder="Contoh: Renbis" class="w-full border-gray-300 rounded-lg text-sm">
+                <input 
+                    type="text" 
+                    name="divisi_pic" 
+                    value="{{ old('divisi_pic') }}" 
+                    required 
+                    placeholder="Contoh: Renbis" 
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
                 <p class="text-[11px] text-gray-400 mt-1">Divisi atau unit kerja penanggung jawab rapat.</p>
             </div>
 
+            <!-- HARI DAN TANGGAL -->
             <div class="mb-4">
                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Hari dan Tanggal</label>
-                <input type="date" name="tanggal" id="zoomDate" value="{{ date('Y-m-d') }}" onchange="fetchZoomAvailability()" required class="w-full border-gray-300 rounded-lg text-sm">
+                <input 
+                    type="date" 
+                    name="tanggal" 
+                    id="zoomDate" 
+                    value="{{ date('Y-m-d') }}" 
+                    onchange="fetchZoomAvailability()" 
+                    required 
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                >
             </div>
 
+            <!-- PILIH JAM -->
             <div class="mb-5">
                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Jam (15 Slot Waktu)</label>
-                <div id="zoomTimeDots" class="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-xl border"></div>
+                <div id="zoomTimeDots" class="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-xl border border-slate-200"></div>
                 <p class="text-[11px] text-gray-400 mt-1.5">Klik satu slot untuk memesan 30 menit, atau klik slot lain setelahnya untuk memesan rentang jam. Klik ulang slot yang sama untuk membatalkan pilihan. *Slot merah menunjukkan seluruh ruangan pada jam tersebut penuh.</p>
             </div>
 
+            <!-- PILIH ROOM ZOOM -->
             <div class="mb-6">
                 <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Room Zoom (Ruang 1 – Ruang 9)</label>
                 <div id="roomDotsContainer" class="grid grid-cols-9 gap-2">
@@ -84,6 +118,29 @@
     </div>
 </div>
 
+<!-- Modal Custom Alert (pengganti alert() bawaan browser) -->
+<div id="customAlertModal" class="fixed inset-0 bg-gray-900/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div id="customAlertBox" class="w-full max-w-xs rounded-xl bg-red-600 p-4 shadow-2xl">
+        <div class="flex items-start gap-2.5">
+            <div id="customAlertIconWrap" class="flex h-8 w-8 shrink-0 items-center justify-center text-white">
+                <svg id="customAlertIcon" class="h-5 w-5" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 6v4.5M10 14h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="10" cy="10" r="8.25" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+            </div>
+            <div class="flex-1 pt-0.5">
+                <h3 id="customAlertTitle" class="text-sm font-bold text-white">Pemberitahuan</h3>
+                <p id="customAlertMessage" class="mt-1 text-xs leading-relaxed text-white"></p>
+            </div>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <button type="button" id="customAlertOkBtn" class="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-blue-600 shadow transition hover:bg-blue-50">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 const slots = @json(\App\Support\TimeSlots::all());
 const totalZoomSlots = slots.length;
@@ -92,6 +149,45 @@ let zoomReservations = [];
 let selectedTime = [];
 let pendingZoomStart = null;
 let activeRoom = null;
+
+// ===== Modal Alert Custom (pengganti alert() bawaan) =====
+const customAlertModal = document.getElementById('customAlertModal');
+const customAlertBox = document.getElementById('customAlertBox');
+const customAlertIconWrap = document.getElementById('customAlertIconWrap');
+const customAlertTitle = document.getElementById('customAlertTitle');
+const customAlertMessage = document.getElementById('customAlertMessage');
+const customAlertOkBtn = document.getElementById('customAlertOkBtn');
+
+function showCustomAlert(message, { title = 'Pemberitahuan', type = 'danger' } = {}) {
+    const styles = {
+        danger: { box: 'bg-red-600' },
+        warning: { box: 'bg-amber-500' },
+        info: { box: 'bg-blue-600' },
+    };
+    const style = styles[type] || styles.danger;
+
+    customAlertBox.className = `w-full max-w-xs rounded-xl p-4 shadow-2xl ${style.box}`;
+    customAlertIconWrap.className = 'flex h-8 w-8 shrink-0 items-center justify-center text-white';
+    customAlertTitle.className = 'text-sm font-bold text-white';
+    customAlertTitle.textContent = title;
+    customAlertMessage.className = 'mt-1 text-xs leading-relaxed text-white';
+    customAlertMessage.innerHTML = message;
+    customAlertOkBtn.className = 'rounded-full bg-white px-4 py-1.5 text-xs font-bold text-blue-600 shadow transition hover:bg-blue-50';
+
+    customAlertModal.classList.remove('hidden');
+    customAlertModal.classList.add('flex');
+}
+
+function closeCustomAlert() {
+    customAlertModal.classList.add('hidden');
+    customAlertModal.classList.remove('flex');
+}
+
+customAlertOkBtn.addEventListener('click', closeCustomAlert);
+customAlertModal.addEventListener('click', (e) => {
+    if (e.target === customAlertModal) closeCustomAlert();
+});
+// ===========================================================
 
 async function fetchZoomAvailability() {
     const d = document.getElementById('zoomDate').value;
@@ -135,7 +231,7 @@ function renderTimeSlots() {
         if (isFull) {
             btn.classList.add('bg-red-500', 'border-red-600', 'text-white');
             btn.title = "Waktu ini ruangannya penuh semua";
-            btn.onclick = () => alert("Waktu ini ruangannya penuh semua");
+            btn.onclick = () => showCustomAlert('Waktu ini ruangannya penuh semua.', { title: 'Semua Ruangan Penuh', type: 'danger' });
             btn.innerHTML = `<span>${slot.label}</span><span class="w-2 h-2 rounded-full bg-white"></span>`;
         } else {
             btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:border-emerald-500');
@@ -179,7 +275,7 @@ function handleTimeSelect(idx) {
 
     for (let i = min; i <= max; i++) {
         if (zoomSlotIsFull(i)) {
-            alert('Tidak dapat memilih rentang yang melompati jam yang penuh semua!');
+            showCustomAlert('Tidak dapat memilih rentang yang melompati jam yang penuh semua!', { title: 'Rentang Tidak Valid', type: 'warning' });
             resetZoomSelection();
             refreshRooms();
             return;
@@ -245,11 +341,11 @@ function refreshRooms() {
         if (booked) {
             btn.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
             ind.className = 'w-2.5 h-2.5 rounded-full bg-red-500 mt-1 room-indicator';
-            btn.onclick = () => alert(
-                `Ruang ${r} sudah dipesan:\n`
-                + `Agenda : ${booked.nama_agenda}\n`
-                + `PIC    : ${booked.nama_pic || '-'}\n`
-                + `Jam    : ${booked.jam_mulai.slice(0,5)} - ${booked.jam_selesai.slice(0,5)}`
+            btn.onclick = () => showCustomAlert(
+                `Agenda: ${booked.nama_agenda}<br>`
+                + `PIC: ${booked.nama_pic || '-'}<br>`
+                + `Jam: ${booked.jam_mulai.slice(0,5)} - ${booked.jam_selesai.slice(0,5)}`,
+                { title: `Ruang ${r} Sudah Dipesan`, type: 'danger' }
             );
         } else if (activeRoom === r) {
             btn.classList.add('bg-emerald-500', 'border-emerald-600', 'text-white');
