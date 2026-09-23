@@ -39,25 +39,71 @@
     </div>
 
     <!-- Filter Bar & Tambah User -->
-    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-5">
-        <form method="GET" action="{{ route('users.index') }}" class="flex flex-wrap sm:flex-nowrap gap-2 w-full sm:w-auto">
-            <div class="relative w-full sm:w-64">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="🔍 Cari ID / nama / NIP..."
-                       class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+    <div class="mb-5 flex flex-col gap-4">
+        <form method="GET" action="{{ route('users.index') }}"
+            class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                    <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                        Cari User
+                    </label>
+                    <input type="text" name="search" value="{{ request('search') }}"
+                        placeholder="Nama, NIP/NIM, divisi..."
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm">
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                        Status
+                    </label>
+                    <select name="status" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <option value="">Semua Status</option>
+                        <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                        Role
+                    </label>
+                    <select name="role" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <option value="">Semua Role</option>
+                        <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="user" {{ request('role') === 'user' ? 'selected' : '' }}>User</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                        Divisi / Unit
+                    </label>
+                    <select name="divisi" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm">
+                        <option value="">Semua Divisi</option>
+                        @foreach ($divisiOptions as $d)
+                            <option value="{{ $d }}" {{ request('divisi') === $d ? 'selected' : '' }}>{{ $d }}</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
-            <select name="filter" onchange="this.form.submit()"
-                    class="border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-                <option value="">Semua Status & Role</option>
-                <option value="Aktif" {{ request('filter') === 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                <option value="Nonaktif" {{ request('filter') === 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                <option value="Admin" {{ request('filter') === 'Admin' ? 'selected' : '' }}>Admin</option>
-                <option value="User" {{ request('filter') === 'User' ? 'selected' : '' }}>User</option>
-            </select>
-            @if(request('search') || request('filter'))
-                <a href="{{ route('users.index') }}" class="px-3 py-2 text-xs text-gray-500 hover:text-gray-700 bg-gray-100 rounded-lg flex items-center">Reset</a>
-            @endif
+
+            <div class="mt-3 flex items-center gap-2">
+                <button type="submit"
+                        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition">
+                    Terapkan Filter
+                </button>
+                @if(request('search') || request('status') || request('role') || request('divisi'))
+                    <a href="{{ route('users.index') }}"
+                    class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
-        <button type="button" onclick="document.getElementById('modalAddUser').classList.remove('hidden')" class="w-full sm:w-auto py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-sm shadow transition flex items-center justify-center gap-1.5">
+
+        <button type="button" onclick="document.getElementById('modalAddUser').classList.remove('hidden')"
+                class="w-full sm:w-auto py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-sm shadow transition flex items-center justify-center gap-1.5 sm:self-end">
             <span>+</span> Tambah User
         </button>
     </div>
@@ -105,15 +151,26 @@
                             </td>
                             <td class="p-3.5 text-right">
                                 <div class="relative inline-block text-left"
-                                     x-data="{ open: false, top: 0, left: 0,
-                                               toggle() {
-                                                   this.open = !this.open;
-                                                   if (this.open) {
-                                                       const r = $el.getBoundingClientRect();
-                                                       this.top = r.bottom + window.scrollY + 4;
-                                                       this.left = r.right + window.scrollX - 208;
-                                                   }
-                                               } }">
+                                    x-data="{ open: false, top: 0, left: 0,
+                                            toggle() {
+                                                this.open = !this.open;
+                                                if (this.open) {
+                                                    const r = $el.getBoundingClientRect();
+                                                    const menuHeight = 190; // perkiraan tinggi dropdown, sesuaikan bila isi menu berubah
+                                                    const spaceBelow = window.innerHeight - r.bottom;
+
+                                                    this.left = r.right - 208;
+
+                                                    if (spaceBelow < menuHeight + 8) {
+                                                        // Ruang di bawah tidak cukup -> buka ke atas tombol
+                                                        this.top = r.top - menuHeight - 4;
+                                                    } else {
+                                                        // Ruang di bawah cukup -> buka ke bawah seperti biasa
+                                                        this.top = r.bottom + 4;
+                                                    }
+                                                }
+                                            } }"
+                                            x-init="window.addEventListener('scroll', () => { if (open) open = false }, true)">
                                     <button type="button" @click="toggle()" class="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100 font-bold transition">
                                         ⋮
                                     </button>
@@ -187,23 +244,23 @@
         <form action="{{ route('users.store') }}" method="POST" class="space-y-4 text-sm">
             @csrf
             <div>
-                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
                 <input type="text" name="name" required placeholder="Nama user"
                        class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div>
-                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email</label>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Email <span class="text-red-500">*</span></label>
                 <input type="email" name="email" required placeholder="user@perusahaan.co.id"
                        class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">NIP / NIM</label>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">NIP / NIM <span class="text-red-500">*</span></label>
                     <input type="text" name="nip" required placeholder="198xxxxx"
                            class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Role</label>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Role <span class="text-red-500">*</span></label>
                     <select name="role" class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
@@ -212,18 +269,18 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi / Unit</label>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi / Unit <span class="text-red-500">*</span></label>
                     <input type="text" name="divisi" required placeholder="Contoh: PDSI"
                            class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Jabatan</label>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Jabatan <span class="text-red-500">*</span></label>
                     <input type="text" name="jabatan" required placeholder="Contoh: Staff"
                            class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
             <div>
-                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Password Awal</label>
+                <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Password Awal <span class="text-red-500">*</span></label>
                 <input type="password" name="password" required placeholder="Minimal 6 karakter"
                        class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>

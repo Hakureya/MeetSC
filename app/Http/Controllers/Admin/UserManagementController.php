@@ -13,22 +13,27 @@ class UserManagementController extends Controller
     {
         $query = User::query();
 
-        if ($filter = $request->get('filter')) {
-            if ($filter === 'Aktif') $query->where('status', 'aktif');
-            if ($filter === 'Nonaktif') $query->where('status', 'nonaktif');
-            if ($filter === 'Admin') $query->where('role', 'admin');
-            if ($filter === 'User') $query->where('role', 'user');
+        if ($status = $request->get('status')) {
+            $query->where('status', $status);
+        }
+
+        if ($role = $request->get('role')) {
+            $query->where('role', $role);
+        }
+
+        if ($divisi = $request->get('divisi')) {
+            $query->where('divisi', $divisi);
         }
 
         if ($search = $request->get('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('nip', 'like', "%{$search}%")
-                  ->orWhere('divisi', 'like', "%{$search}%");
+                ->orWhere('nip', 'like', "%{$search}%")
+                ->orWhere('divisi', 'like', "%{$search}%");
             });
         }
 
-        $users = $query->latest()->paginate(10);
+        $users = $query->latest()->paginate(10)->withQueryString();
 
         $stats = [
             'total' => User::count(),
@@ -37,7 +42,13 @@ class UserManagementController extends Controller
             'admin' => User::where('role', 'admin')->count(),
         ];
 
-        return view('admin.users.index', compact('users', 'stats'));
+        $divisiOptions = User::whereNotNull('divisi')
+            ->where('divisi', '!=', '')
+            ->distinct()
+            ->orderBy('divisi')
+            ->pluck('divisi');
+
+        return view('admin.users.index', compact('users', 'stats', 'divisiOptions'));
     }
 
     public function store(Request $request)

@@ -26,7 +26,7 @@
 
                 <!-- NAMA AGENDA -->
                 <div class="mb-5">
-                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Nama Agenda</label>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Nama Agenda <span class="text-red-500">*</span></label>
                     <input 
                         type="text" 
                         name="nama_agenda" 
@@ -40,7 +40,7 @@
                 <!-- NAMA PIC & NO TELP -->
                 <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Nama PIC</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Nama PIC <span class="text-red-500">*</span></label>
                         <input 
                             type="text" 
                             name="nama_pic" 
@@ -51,7 +51,7 @@
                         >
                     </div>
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">No. Telpon PIC</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">No. Telpon PIC <span class="text-red-500">*</span></label>
                         <input 
                             type="tel" 
                             name="no_telp_pic" 
@@ -66,7 +66,7 @@
                 <!-- DIVISI & TANGGAL -->
                 <div class="mb-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Divisi PIC</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Divisi PIC <span class="text-red-500">*</span></label>
                         <input 
                             type="text" 
                             name="divisi_pic" 
@@ -79,7 +79,7 @@
                     </div>
 
                     <div>
-                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Hari & Tanggal Penggunaan</label>
+                        <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Hari & Tanggal Penggunaan <span class="text-red-500">*</span></label>
                         <input 
                             type="date" 
                             name="tanggal" 
@@ -93,7 +93,7 @@
 
                 <!-- JAM PENGGUNAAN -->
                 <div class="mb-5">
-                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Jam Penggunaan (15 Slot Waktu)</label>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Jam Penggunaan (15 Slot Waktu) <span class="text-red-500">*</span></label>
                     <p class="mb-2 text-xs text-gray-400">Klik satu slot untuk memesan 30 menit, atau klik slot lain setelahnya untuk memesan rentang jam. Klik ulang slot yang sama untuk membatalkan pilihan.</p>
                     <div id="slotDotsContainer" class="grid grid-cols-3 gap-2 rounded-xl border border-dashed border-slate-300 p-3 bg-gray-50"></div>
                     <div class="mt-2 flex flex-wrap items-center gap-4 text-[11px] text-gray-500">
@@ -105,7 +105,7 @@
 
                 <!-- TUJUAN PENGGUNAAN -->
                 <div class="mb-5">
-                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Tujuan Penggunaan Rapat</label>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Tujuan Penggunaan Rapat <span class="text-red-500">*</span></label>
                     <textarea 
                         name="keperluan" 
                         rows="3" 
@@ -117,7 +117,7 @@
 
                 <!-- JUMLAH ORANG -->
                 <div class="mb-5">
-                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Jumlah Orang yang Hadir</label>
+                    <label class="mb-1 block text-xs font-semibold uppercase text-gray-700">Jumlah Orang yang Hadir <span class="text-red-500">*</span></label>
                     <input 
                         type="number" 
                         name="jumlah_peserta" 
@@ -131,29 +131,33 @@
 
                 <!-- KONSUMSI -->
                 <div class="mb-6">
-                    <label class="mb-2 block text-xs font-semibold uppercase text-gray-700">Konsumsi</label>
+                    <label class="mb-2 block text-xs font-semibold uppercase text-gray-700">Konsumsi <span class="text-red-500">*</span></label>
                     <div class="space-y-2 text-sm">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="konsumsi" value="Tanpa Konsumsi" required @if(old('konsumsi') === 'Tanpa Konsumsi') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
-                            <span class="text-gray-700">Tanpa Konsumsi</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="konsumsi" value="Snack Pagi" required @if(old('konsumsi') === 'Snack Pagi') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
-                            <span class="text-gray-700">Snack Pagi</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="konsumsi" value="Makan Siang" required @if(old('konsumsi') === 'Makan Siang') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
-                            <span class="text-gray-700">Makan Siang</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="konsumsi" value="Snack Sore" required @if(old('konsumsi') === 'Snack Sore') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
-                            <span class="text-gray-700">Snack Sore</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="konsumsi" value="Prasmanan" required @if(old('konsumsi') === 'Prasmanan') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
-                            <span class="text-gray-700">Prasmanan</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="konsumsi" value="Tanpa Konsumsi" required @if(old('konsumsi') === 'Tanpa Konsumsi') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="text-gray-700">Tanpa Konsumsi</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="konsumsi" value="Snack" required @if(old('konsumsi') === 'Snack') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="text-gray-700">Snack</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="konsumsi" value="Makan Siang" required @if(old('konsumsi') === 'Makan Siang') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="text-gray-700">Makan Siang</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="konsumsi" value="Makan Malam" required @if(old('konsumsi') === 'Makan Malam') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="text-gray-700">Makan Malam</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="konsumsi" value="Snack dan Makan Siang" required @if(old('konsumsi') === 'Snack dan Makan Siang') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="text-gray-700">Snack dan Makan Siang</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="konsumsi" value="Disiapkan PLN NP/PLN IP/Eksternal" required @if(old('konsumsi') === 'Disiapkan PLN NP/PLN IP/Eksternal') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
+                        <span class="text-gray-700">Disiapkan PLN NP/PLN IP/Eksternal</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
                             <input type="radio" name="konsumsi" id="konsumsiOther" value="Other" required @if(old('konsumsi') === 'Other') checked @endif onchange="toggleKonsumsiLainnya()" class="text-blue-600 focus:ring-blue-500">
                             <span class="text-gray-700">Other:</span>
                         </label>

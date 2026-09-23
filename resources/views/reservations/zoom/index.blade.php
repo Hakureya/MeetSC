@@ -28,7 +28,7 @@
 
             <!-- NAMA AGENDA -->
             <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Agenda</label>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama Agenda <span class="text-red-500">*</span></label>
                 <input 
                     type="text" 
                     name="nama_agenda" 
@@ -42,7 +42,7 @@
             <!-- NAMA PIC & NO TELP -->
             <div class="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama PIC</label>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Nama PIC <span class="text-red-500">*</span></label>
                     <input 
                         type="text" 
                         name="nama_pic" 
@@ -53,7 +53,7 @@
                     >
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">No. Telpon PIC</label>
+                    <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">No. Telpon PIC <span class="text-red-500">*</span></label>
                     <input 
                         type="tel" 
                         name="no_telp_pic" 
@@ -67,7 +67,7 @@
 
             <!-- DIVISI PIC -->
             <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Divisi PIC</label>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Divisi PIC <span class="text-red-500">*</span></label>
                 <input 
                     type="text" 
                     name="divisi_pic" 
@@ -81,7 +81,7 @@
 
             <!-- HARI DAN TANGGAL -->
             <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Hari dan Tanggal</label>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-1">Hari dan Tanggal <span class="text-red-500">*</span></label>
                 <input 
                     type="date" 
                     name="tanggal" 
@@ -95,14 +95,14 @@
 
             <!-- PILIH JAM -->
             <div class="mb-5">
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Jam (15 Slot Waktu)</label>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Jam (15 Slot Waktu) <span class="text-red-500">*</span></label>
                 <div id="zoomTimeDots" class="grid grid-cols-3 gap-2 p-3 bg-gray-50 rounded-xl border border-slate-200"></div>
                 <p class="text-[11px] text-gray-400 mt-1.5">Klik satu slot untuk memesan 30 menit, atau klik slot lain setelahnya untuk memesan rentang jam. Klik ulang slot yang sama untuk membatalkan pilihan. *Slot merah menunjukkan seluruh ruangan pada jam tersebut penuh.</p>
             </div>
 
             <!-- PILIH ROOM ZOOM -->
             <div class="mb-6">
-                <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Room Zoom (Ruang 1 – Ruang 9)</label>
+                <label class="block text-xs font-semibold text-gray-700 uppercase mb-2">Pilih Room Zoom (Ruang 1 – Ruang 9) <span class="text-red-500">*</span></label>
                 <div id="roomDotsContainer" class="grid grid-cols-9 gap-2">
                     @for($i=1; $i<=9; $i++)
                         <button type="button" id="room-dot-{{ $i }}" onclick="selectZoomRoom({{ $i }})" class="p-3 border rounded-xl flex flex-col items-center bg-gray-100 text-gray-600 transition">

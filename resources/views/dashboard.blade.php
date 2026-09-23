@@ -511,116 +511,43 @@
 </div>
 
 {{-- Modal Detail Pembuatan Form Kehadiran --}}
+{{-- Gaya kartu & seksi modal ini disamakan dengan modal Detail Reservasi
+     (Ruang Rapat & Breakout Room Zoom) di atas, supaya tampilan detail
+     konsisten di semua jenis reservasi pada Dashboard. --}}
 <div
     id="dashboardFormDetailModal"
-    class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-4"
+    class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-4"
     role="dialog"
     aria-modal="true"
     aria-labelledby="formModalTitle"
 >
-    <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden border">
 
-        {{-- Header --}}
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+        {{-- Header Modal --}}
+        <div class="flex justify-between items-center px-4 py-3 border-b bg-gray-50 shrink-0">
             <div>
-                <h3 id="formModalTitle" class="text-lg font-bold text-slate-900">
-                    Detail Pembuatan Form
-                </h3>
-                <p id="formModalId" class="mt-1 text-xs text-slate-400"></p>
+                <h4 id="formModalTitle" class="font-bold text-gray-800 text-sm">Detail Pembuatan Form</h4>
+                <p id="formModalIdText" class="mt-0.5 text-xs text-gray-400"></p>
             </div>
 
             <button
                 type="button"
                 onclick="closeFormDetailModal()"
-                class="text-2xl text-slate-400 hover:text-slate-600"
+                class="text-gray-400 hover:text-gray-600 text-xl leading-none"
                 aria-label="Tutup detail"
             >
                 &times;
             </button>
         </div>
 
-        {{-- Status --}}
-        <div class="py-4">
-            <span
-                id="formModalStatus"
-                class="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
-            ></span>
+        {{-- Body Modal (Scrollable) --}}
+        <div id="formModalBody" class="px-4 py-3 overflow-y-auto flex-1 space-y-3">
+            <!-- Konten diisi lewat JS -->
         </div>
 
-        {{-- Informasi Pembuatan Form --}}
-        <div class="space-y-4 text-sm">
-            <div>
-                <h4 class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Informasi Form
-                </h4>
-
-                <div class="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Judul Form</span>
-                        <span id="formModalJudul" class="max-w-[60%] text-right font-semibold text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">PIC</span>
-                        <span id="formModalPic" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Divisi PIC</span>
-                        <span id="formModalDivisiPic" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Tempat</span>
-                        <span id="formModalTempat" class="max-w-[60%] text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Rapat / Pertemuan</span>
-                        <span id="formModalRapat" class="max-w-[60%] text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Kedaluwarsa</span>
-                        <span id="formModalExpires" class="text-right text-slate-800"></span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Informasi Pembuatan --}}
-            <div>
-                <h4 class="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-                    Informasi Pemesanan
-                </h4>
-
-                <div class="divide-y divide-slate-100 rounded-lg border border-slate-100">
-                    <div class="flex justify-between gap-4 p-3">
-                        <span class="text-slate-500">Dibuat pada</span>
-                        <span id="formModalCreated" class="text-right text-slate-800"></span>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4 p-3">
-                        <span class="text-slate-500">Link Formulir</span>
-                        <button
-                            type="button"
-                            id="formModalCopyLink"
-                            onclick="copyFormDetailLink()"
-                            class="max-w-[60%] truncate text-right font-semibold text-brand-600 hover:underline"
-                        ></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Footer --}}
-        <div class="mt-6 flex justify-end border-t border-slate-100 pt-4">
-            <button
-                type="button"
-                onclick="closeFormDetailModal()"
-                class="rounded-lg bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-200"
-            >
-                Tutup
-            </button>
+        {{-- Footer Modal --}}
+        <div id="formModalActions" class="px-4 py-3 border-t bg-gray-50 shrink-0">
+            <!-- Tombol aksi diisi lewat JS -->
         </div>
     </div>
 </div>
@@ -817,38 +744,87 @@
 
     // ------------------------------------------------------------------
     // Modal Detail Pembuatan Form Kehadiran
+    // (gaya disamakan dengan openDashboardDetail di atas)
     // ------------------------------------------------------------------
     function openFormDetailModal(res) {
-        dashboardSetText('formModalId', res.id);
-        dashboardSetText('formModalJudul', res.judul);
-        dashboardSetText('formModalPic', res.pic);
-        dashboardSetText('formModalDivisiPic', res.divisi_pic);
-        dashboardSetText('formModalTempat', res.tempat);
-        dashboardSetText('formModalRapat', res.rapat);
-        dashboardSetText('formModalExpires', res.expires_label);
-        dashboardSetText('formModalCreated', res.created_at);
-
-        const linkBtn = document.getElementById('formModalCopyLink');
-        linkBtn.textContent = res.link ?? '-';
-        linkBtn.dataset.link = res.link ?? '';
-
-        const status = document.getElementById('formModalStatus');
+        document.getElementById('formModalTitle').innerText = `Detail Pembuatan Form ${res.id}`;
+        document.getElementById('formModalIdText').textContent = '';
 
         const statusLabels = {
             mendatang: 'Formulir Aktif',
             selesai: 'Sudah Kedaluwarsa',
         };
 
-        const statusClasses = {
-            mendatang: 'bg-emerald-100 text-emerald-700',
-            selesai: 'bg-slate-100 text-slate-600',
-        };
+        const statusColor = res.status === 'mendatang' ? 'emerald' : 'slate';
 
-        status.textContent = statusLabels[res.status] ?? res.status;
+        const sections = [
+            dashboardSection('Informasi Form', [
+                dashboardRow('Kode', res.id),
+                dashboardRow('Judul Form', res.judul),
+                dashboardRow('Tempat', res.tempat),
+                dashboardRow('Rapat / Pertemuan', res.rapat),
+                dashboardRow('Kedaluwarsa', res.expires_label),
+            ]),
 
-        status.className =
-            'inline-flex rounded-full px-3 py-1 text-xs font-semibold ' +
-            (statusClasses[res.status] ?? 'bg-gray-100 text-gray-700');
+            dashboardSection('Penanggung Jawab', [
+                dashboardRow('Nama PIC', res.pic),
+                dashboardRow('Divisi PIC', res.divisi_pic),
+            ]),
+
+            dashboardSection('Pemesanan', [
+                dashboardRow('Status', statusLabels[res.status] ?? res.status),
+                dashboardRow('Dibuat', res.created_at),
+            ]),
+        ];
+
+        // Link Formulir — ditampilkan sebagai kotak yang bisa disalin,
+        // sama seperti kotak Broadcast & Link Zoom di modal Detail Reservasi.
+        const linkBlock = res.link ? `
+            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs sm:col-span-2">
+                <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Link Formulir</p>
+                <div id="formModalLinkText" class="whitespace-pre-wrap rounded-md border border-gray-100 bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-700 select-all">${dashboardEscapeHtml(res.link)}</div>
+                <button
+                    type="button"
+                    onclick="copyFormDetailLink()"
+                    id="formModalCopyLinkBtn"
+                    data-link="${dashboardEscapeHtml(res.link)}"
+                    class="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
+                >
+                    Salin Link Formulir
+                </button>
+            </div>
+        ` : '';
+
+        document.getElementById('formModalBody').innerHTML = `
+            <div class="mb-2">
+                <span class="inline-flex items-center gap-1 rounded-full bg-${statusColor}-50 px-2.5 py-0.5 text-[11px] font-bold text-${statusColor}-700 border border-${statusColor}-200">
+                    <span class="h-1.5 w-1.5 rounded-full bg-${statusColor}-500"></span>
+                    ${dashboardEscapeHtml(statusLabels[res.status] ?? res.status)}
+                </span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                ${sections.join('')}
+                ${linkBlock}
+            </div>
+        `;
+
+        // Tombol "Buka Formulir" — hanya muncul kalau link tersedia.
+        const openLinkButtonHtml = res.link ? `
+            <a
+                href="${dashboardEscapeHtml(res.link)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full block text-center py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-bold text-xs transition-colors"
+            >
+                Buka Formulir
+            </a>
+        ` : '';
+
+        document.getElementById('formModalActions').innerHTML = openLinkButtonHtml ? `
+            <div class="flex flex-col gap-2">
+                ${openLinkButtonHtml}
+            </div>
+        ` : '';
 
         const modal = document.getElementById('dashboardFormDetailModal');
 
@@ -863,23 +839,26 @@
         modal.classList.remove('flex');
     }
 
-        function copyFormDetailLink() {
-        const link = document.getElementById('formModalCopyLink').dataset.link;
-
+    function copyFormDetailLink() {
+        const btn = document.getElementById('formModalCopyLinkBtn');
+        const link = btn?.dataset.link;
         if (!link) return;
+
+        function markCopied() {
+            btn.textContent = 'Berhasil Disalin!';
+            setTimeout(() => { btn.textContent = 'Salin Link Formulir'; }, 2000);
+        }
 
         // navigator.clipboard hanya tersedia di HTTPS atau localhost/127.0.0.1.
         // Saat diakses lewat IP LAN via HTTP biasa, ini bisa undefined dan gagal diam-diam.
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(link)
-                .then(() => alert('Link formulir berhasil disalin!'))
-                .catch(() => copyFormDetailLinkFallback(link));
+            navigator.clipboard.writeText(link).then(markCopied).catch(() => copyFormDetailLinkFallback(link, markCopied));
         } else {
-            copyFormDetailLinkFallback(link);
+            copyFormDetailLinkFallback(link, markCopied);
         }
     }
 
-    function copyFormDetailLinkFallback(link) {
+    function copyFormDetailLinkFallback(link, onSuccess) {
         const textarea = document.createElement('textarea');
         textarea.value = link;
         textarea.style.position = 'fixed';
@@ -888,10 +867,13 @@
         textarea.focus();
         textarea.select();
         try {
-            const success = document.execCommand('copy');
-            alert(success ? 'Link formulir berhasil disalin!' : 'Gagal menyalin link. Salin manual: ' + link);
+            if (document.execCommand('copy')) {
+                onSuccess();
+            } else {
+                alert('Gagal menyalin otomatis. Salin manual: ' + link);
+            }
         } catch (e) {
-            alert('Gagal menyalin link. Salin manual: ' + link);
+            alert('Gagal menyalin otomatis. Salin manual: ' + link);
         }
         document.body.removeChild(textarea);
     }
