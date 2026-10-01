@@ -30,13 +30,13 @@
                     class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-500"
                 >
                     <option value="">Semua Jenis</option>
-                    <option value="room" @selected(request('jenis') === 'room')>
-                        Ruang Meeting
+                    <option value="Ruang" @selected(request('jenis') === 'Ruang')>
+                        Ruang Rapat
                     </option>
-                    <option value="zoom" @selected(request('jenis') === 'zoom')>
-                        Zoom Meeting
+                    <option value="Zoom" @selected(request('jenis') === 'Zoom')>
+                        Breakout Room Zoom
                     </option>
-                    <option value="form" @selected(request('jenis') === 'form')>
+                    <option value="Form" @selected(request('jenis') === 'Form')>
                         Form Kehadiran
                     </option>
                 </select>
@@ -127,7 +127,7 @@
                 </button>
 
                 <a
-                    href="{{ route('dashboard') }}"
+                    href="{{ route('reservations.index') }}"
                     class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
                 >
                     Reset
@@ -146,9 +146,9 @@
                         <th class="p-3">Pemesan</th>
                         <th class="p-3">Jenis</th>
                         <th class="p-3">Ruangan / Tempat</th>
+                        <th class="p-3">Keperluan</th>
                         <th class="p-3">Tanggal</th>
                         <th class="p-3">Waktu</th>
-                        <th class="p-3">Keperluan</th>
                         <th class="p-3">Status</th>
                         <th class="p-3 text-center">Aksi</th>
                     </tr>
@@ -176,9 +176,9 @@
                                 </span>
                             </td>
                             <td class="p-3 font-semibold">{{ $res['ruang'] }}</td>
+                            <td class="p-3 truncate max-w-xs">{{ $res['keperluan'] }}</td>
                             <td class="p-3">{{ $res['tanggal'] }}</td>
                             <td class="p-3">{{ $res['waktu'] }}</td>
-                            <td class="p-3 truncate max-w-xs">{{ $res['keperluan'] }}</td>
                             <td class="p-3">
                                 @php
                                     $statusLabels = [
@@ -194,7 +194,7 @@
                                 </span>
                             </td>
                             <td class="p-3 text-center">
-                                <button onclick='openDetailModal(@json($res))' class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md font-semibold hover:bg-emerald-100 transition-colors">Detail</button>
+                                <button type="button" onclick="openReservationDetail(@js($res['detail']))" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-md font-semibold hover:bg-emerald-100 transition-colors">Detail</button>
                             </td>
                         </tr>
                     @empty
@@ -214,248 +214,83 @@
     @endif
 </div>
 
-{{-- Modal Detail Reservasi --}}
-<div id="detailModal" class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-4">
-    <!-- max-w-xl membatasi lebar agar pas dan tidak kelebaran -->
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden border">
-        
-        {{-- Header Modal --}}
-        <div class="flex justify-between items-center px-4 py-3 border-b bg-gray-50 shrink-0">
-            <h4 id="modalTitle" class="font-bold text-gray-800 text-sm">Detail Reservasi</h4>
-            <button type="button" onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
+{{-- Modal Detail Reservasi (bersama dengan Dashboard) --}}
+@include('partials.reservation-detail-modal')
+
+{{-- Modal Konfirmasi Pembatalan oleh Admin (menggantikan confirm() bawaan browser) --}}
+<div
+    id="cancelConfirmModal"
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cancelConfirmTitle"
+>
+    <div class="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
 
-        {{-- Body Modal (Scrollable jika layar pendek) --}}
-        <div id="modalBody" class="px-4 py-3 overflow-y-auto flex-1 space-y-3">
-            <!-- Konten diisi lewat JS -->
-        </div>
+        <h3 id="cancelConfirmTitle" class="mt-4 text-lg font-bold text-slate-900">Batalkan Reservasi?</h3>
+        <p id="cancelConfirmText" class="mt-1.5 text-sm text-slate-500">
+            Reservasi akan dibatalkan.
+        </p>
 
-        {{-- Footer Modal --}}
-        <div id="modalActions" class="px-4 py-3 border-t bg-gray-50 shrink-0">
-            <!-- Action button diisi lewat JS -->
+        <div class="mt-6 flex gap-3">
+            <button
+                type="button"
+                onclick="closeCancelConfirm()"
+                class="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+                Batal
+            </button>
+            <button
+                type="button"
+                onclick="submitCancelConfirm()"
+                class="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+            >
+                Ya, Batalkan Reservasi
+            </button>
         </div>
-
     </div>
 </div>
 
+{{-- Form pembatalan oleh Admin, dikirim dari modal konfirmasi di atas. --}}
+<form id="adminCancelForm" method="POST" class="hidden">
+    @csrf
+</form>
+
 <script>
-const csrfToken = '{{ csrf_token() }}';
+    // Dipanggil modal detail bersama saat tombol "Batalkan Reservasi" diklik.
+    function reservationDetailCancel(res) {
+        closeReservationDetail();
 
-function statusLabel(status) {
-    const labels = {
-        mendatang: 'Mendatang',
-        selesai: 'Selesai',
-        menunggu_pembatalan: 'Menunggu Pembatalan',
-        dibatalkan: 'Dibatalkan',
-    };
-    return labels[status] || status;
-}
+        const jenis = res.cancel.jenis === 'room' ? 'Ruang' : 'Zoom';
+        document.getElementById('adminCancelForm').action =
+            `/semua-pemesanan/batalkan/${jenis}/${res.cancel.raw_id}`;
+        document.getElementById('cancelConfirmText').textContent =
+            `Reservasi ${res.kode ?? ''} akan dibatalkan.`;
 
-function openDetailModal(res) {
-    const user = res.user || {};
-
-    document.getElementById('modalTitle').innerText = `Detail Reservasi ${res.id}`;
-
-    const row = (label, value) => {
-        if (value === null || value === undefined || value === '') return '';
-        return `
-            <div class="flex justify-between gap-2 py-1 border-b border-gray-100 last:border-0 text-[11px]">
-                <span class="text-gray-500 font-medium shrink-0">${label}</span>
-                <span class="font-semibold text-gray-800 text-right truncate">${value}</span>
-            </div>
-        `;
-    };
-
-    const section = (title, rowsHtml) => {
-        const filled = rowsHtml.filter(Boolean).join('');
-        if (!filled) return '';
-        return `
-            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs flex flex-col justify-between">
-                <div>
-                    <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">${title}</p>
-                    <div class="space-y-0.5">${filled}</div>
-                </div>
-            </div>
-        `;
-    };
-
-    const sections = [
-        section('Informasi Pemesan', [
-            row('Nama', user.name),
-            row('NIP', user.nip || '-'),
-            row('Divisi', res.divisi_pemesan || user.divisi || '-'),
-            row('Jabatan', user.jabatan || 'Staff'),
-            row('Email', res.email_pemesan)
-        ]),
-
-        section('Informasi Reservasi', [
-            row('Kode', res.id),
-            row(
-                'Jenis',
-                res.jenis === 'Ruang'
-                    ? 'Ruang Rapat'
-                    : res.jenis === 'Zoom'
-                    ? 'Breakout Room Zoom'
-                    : res.jenis === 'Form'
-                    ? 'Form Kehadiran'
-                    : '-' // Nilai bawaan (default) jika tidak ada yang cocok
-                ),
-            row('Ruangan', res.ruang),
-            row('Lantai', res.lantai),
-            row('Kapasitas', res.kapasitas),
-            row('Ruang Gabungan', res.ruang_gabungan),
-            row('Tanggal', res.tanggal_lengkap || res.tanggal),
-            row('Waktu', res.waktu),
-            row('Peserta', res.jumlah_peserta ? `${res.jumlah_peserta} orang` : null),
-            row('Konsumsi', res.konsumsi),
-            row('Keperluan', res.keperluan)
-        ]),
-
-        section('Penanggung Jawab', [
-            row('Nama PIC', res.nama_pic || '-'),
-            row('No. Telp PIC', res.no_telp_pic),
-            row('Divisi PIC', res.divisi_pic)
-        ]),
-
-        section('Pemesanan', [
-            row('Status', statusLabel(res.status)),
-            row('Dibuat', res.dibuat)
-        ])
-    ];
-
-    // Broadcast & Link Zoom — hanya untuk reservasi Breakout Room Zoom, supaya
-    // Admin bisa melihat/menyalin lagi teks broadcast + link Zoom dari riwayat.
-    const escapeHtml = (str) => String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    const broadcastBlock = (res.jenis === 'Zoom' && res.broadcast) ? `
-        <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs sm:col-span-2">
-            <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Broadcast &amp; Link Zoom</p>
-            <div id="modalBroadcastText" class="whitespace-pre-wrap rounded-md border border-gray-100 bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-700 select-all">${escapeHtml(res.broadcast)}</div>
-            <button
-                type="button"
-                onclick="copyAdminBroadcast()"
-                id="adminCopyBroadcastBtn"
-                class="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
-            >
-                Salin Broadcast
-            </button>
-        </div>
-    ` : '';
-
-    document.getElementById('modalBody').innerHTML = `
-        <div class="mb-2">
-            <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                ${statusLabel(res.status)}
-            </span>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            ${sections.join('')}
-            ${broadcastBlock}
-        </div>
-    `;
-
-    const actionContainer = document.getElementById('modalActions');
-    actionContainer.innerHTML = '';
-
-    // Reservasi berstatus "selesai" atau "dibatalkan" tidak bisa dibatalkan lagi,
-    // begitu pula pemesanan yang memang tidak punya mekanisme pembatalan (Form Kehadiran).
-    const canCancel = res.can_cancel && res.status !== 'dibatalkan' && res.status !== 'selesai';
-
-    // Tombol menuju link Zoom — hanya untuk reservasi Breakout Room Zoom.
-    const zoomButtonHtml = (res.jenis === 'Zoom' && res.zoom_link) ? `
-        <a
-            href="${escapeHtml(res.zoom_link)}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="w-full block text-center py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-bold text-xs transition-colors"
-        >
-            Menuju Link Zoom
-        </a>
-    ` : '';
-
-    const cancelFormHtml = canCancel ? `
-        <form action="/semua-pemesanan/batalkan/${res.jenis}/${res.raw_id}" method="POST" class="w-full">
-            <input type="hidden" name="_token" value="${csrfToken}">
-            <button 
-                type="submit" 
-                onclick="return confirm('Apakah Anda yakin ingin membatalkan reservasi ini?')"
-                class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
-            >
-                Batalkan Reservasi
-            </button>
-        </form>
-    ` : '';
-
-    if (zoomButtonHtml || cancelFormHtml) {
-        actionContainer.innerHTML = `
-            <div class="flex flex-col gap-2">
-                ${zoomButtonHtml}
-                ${cancelFormHtml}
-            </div>
-        `;
+        const modal = document.getElementById('cancelConfirmModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
 
-    const modal = document.getElementById('detailModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-}
-
-function closeDetailModal() {
-    const modal = document.getElementById('detailModal');
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-}
-
-// ------------------------------------------------------------------
-// Salin Broadcast Zoom (dari modal Detail Reservasi Admin)
-// ------------------------------------------------------------------
-function copyAdminBroadcast() {
-    const el = document.getElementById('modalBroadcastText');
-    const btn = document.getElementById('adminCopyBroadcastBtn');
-    if (!el || !btn) return;
-
-    const text = el.textContent;
-
-    function markCopied() {
-        btn.innerText = 'Berhasil Disalin!';
-        setTimeout(() => { btn.innerText = 'Salin Broadcast'; }, 2000);
+    function closeCancelConfirm() {
+        const modal = document.getElementById('cancelConfirmModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(markCopied).catch(() => copyAdminBroadcastFallback(text, markCopied));
-    } else {
-        copyAdminBroadcastFallback(text, markCopied);
+    function submitCancelConfirm() {
+        document.getElementById('adminCancelForm').submit();
     }
-}
 
-function copyAdminBroadcastFallback(text, onSuccess) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-    try {
-        if (document.execCommand('copy')) {
-            onSuccess();
-        } else {
-            alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
-        }
-    } catch (e) {
-        alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
-    }
-    document.body.removeChild(textarea);
-}
+    document.getElementById('cancelConfirmModal').addEventListener('click', function (event) {
+        if (event.target === this) closeCancelConfirm();
+    });
 
-document.getElementById('detailModal').addEventListener('click', function(event) {
-    if (event.target === this) {
-        closeDetailModal();
-    }
-});
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeCancelConfirm();
+    });
 </script>
 </x-layouts.app>

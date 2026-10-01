@@ -66,6 +66,8 @@
                                     <p class="mt-1.5 inline-flex items-center gap-1 rounded-md bg-brand-50 px-2 py-0.5 text-[10px] font-semibold text-brand-600">
                                         Ruang Gabungan · memakai kedua ruangan sekaligus
                                     </p>
+                                @else
+                                    <br>
                                 @endif
 
                                 @if ($hasSchedule)

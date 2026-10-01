@@ -28,8 +28,7 @@ class UserManagementController extends Controller
         if ($search = $request->get('search')) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                ->orWhere('nip', 'like', "%{$search}%")
-                ->orWhere('divisi', 'like', "%{$search}%");
+                ->orWhere('nip', 'like', "%{$search}%");
             });
         }
 
@@ -135,6 +134,11 @@ class UserManagementController extends Controller
 
     public function destroy($id)
     {
+        // Tombol hapus sudah disembunyikan di akun sendiri; ini pengaman di sisi server.
+        if ((int) $id === auth()->id()) {
+            return back()->withErrors(['Anda tidak dapat menghapus akun Anda sendiri.']);
+        }
+
         User::findOrFail($id)->delete();
         return back()->with('success', 'User berhasil dihapus.');
     }

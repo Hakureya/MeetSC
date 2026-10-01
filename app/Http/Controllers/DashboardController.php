@@ -6,6 +6,7 @@ use App\Events\ZoomRoomsUpdated;
 use App\Models\AttendanceForm;
 use App\Models\RoomReservation;
 use App\Models\ZoomReservation;
+use App\Support\ReservationDetail;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -26,7 +27,7 @@ class DashboardController extends Controller
         // Reservasi ruang untuk HARI INI saja. Reservasi turunan ruang gabungan
         // dikecualikan supaya satu pemesanan gabungan tetap tampil sebagai satu kartu.
         $todayRoomReservations = $user->roomReservations()
-            ->with('room')
+            ->with(['room', 'childReservations.room'])
             ->where('status', 'mendatang')
             ->whereDate('tanggal', $today)
             ->where('auto_generated', false)
@@ -59,6 +60,8 @@ class DashboardController extends Controller
                 'no_telp_pic' => $r->no_telp_pic,
                 'divisi_pic' => $r->divisi_pic,
                 'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+                'detail' => ReservationDetail::room($r, 'RM-' . $r->id),
                 'broadcast' => null,
                 'zoom_link' => null,
             ]);
@@ -81,6 +84,8 @@ class DashboardController extends Controller
                 'no_telp_pic' => $r->no_telp_pic,
                 'divisi_pic' => $r->divisi_pic,
                 'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+                'detail' => ReservationDetail::zoom($r, 'ZM-' . $r->id),
                 'broadcast' => $r->broadcast_text,
                 'zoom_link' => \App\Models\ZoomReservation::ZOOM_LINK,
             ]);
@@ -117,7 +122,7 @@ class DashboardController extends Controller
         */
 
         $roomReservations = $user->roomReservations()
-            ->with('room')
+            ->with(['room', 'childReservations.room'])
             ->where('auto_generated', false)
             ->get();
 
@@ -150,6 +155,8 @@ class DashboardController extends Controller
                 'status' => $r->status,
                 'created_at' => $r->created_at,
                 'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+                'detail' => ReservationDetail::room($r, 'RM-' . $r->id, ['cancel' => 'request']),
                 'jumlah_peserta' => $r->jumlah_peserta,
                 'konsumsi' => $r->konsumsi,
                 'nama_pic' => $r->nama_pic,
@@ -173,7 +180,7 @@ class DashboardController extends Controller
                 'raw_id' => $r->id,
                 'jenis' => 'zoom',
                 'jenis_label' => 'Breakout Room Zoom',
-                'ruangan' => 'Zoom Meeting',
+                'ruangan' => 'Ruang ' . $r->room_number,
                 'keperluan' => $r->nama_agenda ?? '-',
                 'tanggal' => $r->tanggal->format('d/m/Y'),
                 'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
@@ -182,6 +189,8 @@ class DashboardController extends Controller
                 'status' => $r->status,
                 'created_at' => $r->created_at,
                 'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+                'detail' => ReservationDetail::zoom($r, 'ZM-' . $r->id, ['cancel' => 'request']),
                 'jumlah_peserta' => null,
                 'konsumsi' => null,
                 'nama_pic' => $r->nama_pic,
@@ -205,7 +214,7 @@ class DashboardController extends Controller
                 'raw_id' => $f->id,
                 'jenis' => 'form',
                 'jenis_label' => 'Form Kehadiran',
-                'ruangan' => $f->judul,
+                'ruangan' => $f->tempat ?? '-',
                 // Kolom keperluan untuk form diisi dari atribut rapat/agenda form.
                 'keperluan' => $f->rapat_pertemuan ?? '-',
                 'tanggal' => $f->created_at->format('d/m/Y'),
@@ -215,6 +224,8 @@ class DashboardController extends Controller
                 'status' => $f->isExpired() ? 'selesai' : 'mendatang',
                 'created_at' => $f->created_at,
                 'created_at_label' => $f->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+                'detail' => ReservationDetail::form($f, 'FM-' . $f->id),
                 'jumlah_peserta' => null,
                 'konsumsi' => null,
                 'nama_pic' => null,

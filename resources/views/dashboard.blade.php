@@ -54,24 +54,7 @@
                     <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $statusLabel[$r['status']][1] }}">{{ $statusLabel[$r['status']][0] }}</span>
                     <button
                         type="button"
-                        onclick="openDashboardDetail(@js([
-                            'id' => $r['id'],
-                            'jenis' => $r['jenis_label'],
-                            'jenis_raw' => $r['jenis'],
-                            'ruang' => $r['ruangan'],
-                            'tanggal' => $r['tanggal_lengkap'],
-                            'waktu' => $r['waktu'],
-                            'keperluan' => $r['keperluan'],
-                            'status' => $r['status'],
-                            'jumlah_peserta' => $r['jumlah_peserta'],
-                            'konsumsi' => $r['konsumsi'],
-                            'nama_pic' => $r['nama_pic'],
-                            'no_telp_pic' => $r['no_telp_pic'],
-                            'divisi_pic' => $r['divisi_pic'],
-                            'created_at' => $r['created_at_label'],
-                            'broadcast' => $r['broadcast'],
-                            'zoom_link' => $r['zoom_link'],
-                        ]))"
+                        onclick="openReservationDetail(@js($r['detail']))"
                         class="rounded-lg border border-slate-200 px-3.5 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
                     >
                         Lihat Detail
@@ -239,7 +222,7 @@
                     <tr>
                         <th class="p-3">ID</th>
                         <th class="p-3">Jenis</th>
-                        <th class="p-3">Ruangan / Agenda</th>
+                        <th class="p-3">Ruangan / Tempat</th>
                         <th class="p-3">Keperluan</th>
                         <th class="p-3">Tanggal</th>
                         <th class="p-3">Waktu</th>
@@ -328,18 +311,7 @@
                                                 @if ($r['jenis'] === 'form')
                                                     <button type="button"
                                                             @click="open = false"
-                                                            onclick="openFormDetailModal(@js([
-                                                                'id' => $r['id'],
-                                                                'judul' => $r['ruangan'],
-                                                                'pic' => $r['form_pic'],
-                                                                'divisi_pic' => $r['form_divisi_pic'],
-                                                                'tempat' => $r['form_tempat'],
-                                                                'rapat' => $r['form_rapat'],
-                                                                'expires_label' => $r['form_expires_label'],
-                                                                'status' => $r['status'],
-                                                                'created_at' => $r['created_at_label'],
-                                                                'link' => $r['form_link'],
-                                                            ]))"
+                                                            onclick="openReservationDetail(@js($r['detail']))"
                                                             class="block w-full px-4 py-2 text-left hover:bg-brand-50 hover:text-brand-600">
                                                         Lihat Detail
                                                     </button>
@@ -351,26 +323,7 @@
                                                 @else
                                                     <button type="button"
                                                             @click="open = false"
-                                                            onclick="openDashboardDetail(@js([
-                                                                'id' => $r['id'],
-                                                                'jenis' => $r['jenis_label'],
-                                                                'jenis_raw' => $r['jenis'],
-                                                                'ruang' => $r['ruangan'],
-                                                                'tanggal' => $r['tanggal_lengkap'],
-                                                                'waktu' => $r['waktu'],
-                                                                'keperluan' => $r['keperluan'],
-                                                                'status' => $r['status'],
-                                                                'jumlah_peserta' => $r['jumlah_peserta'],
-                                                                'konsumsi' => $r['konsumsi'],
-                                                                'nama_pic' => $r['nama_pic'],
-                                                                'no_telp_pic' => $r['no_telp_pic'],
-                                                                'divisi_pic' => $r['divisi_pic'],
-                                                                'created_at' => $r['created_at_label'],
-                                                                'broadcast' => $r['broadcast'],
-                                                                'zoom_link' => $r['zoom_link'],
-                                                                'can_cancel' => $r['can_cancel'],
-                                                                'raw_id' => $r['raw_id'],
-                                                            ]))"
+                                                            onclick="openReservationDetail(@js($r['detail']))"
                                                             class="block w-full px-4 py-2 text-left hover:bg-brand-50 hover:text-brand-600">
                                                         Lihat Detail
                                                     </button>
@@ -468,414 +421,14 @@
     <input type="hidden" name="id" id="cancelConfirmId">
 </form>
 
-{{-- Modal Detail Reservasi Dashboard --}}
-{{-- Gaya kartu & seksi modal ini disamakan dengan modal Detail Reservasi
-     di halaman Semua Pemesanan (Admin), supaya tampilan detail konsisten
-     di Dashboard, Breakout Room Zoom, maupun Semua Pemesanan. --}}
-<div
-    id="dashboardDetailModal"
-    class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="dashboardModalTitle"
->
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden border">
-
-        {{-- Header Modal --}}
-        <div class="flex justify-between items-center px-4 py-3 border-b bg-gray-50 shrink-0">
-            <div>
-                <h4 id="dashboardModalTitle" class="font-bold text-gray-800 text-sm">Detail Reservasi</h4>
-                <p id="dashboardModalId" class="mt-0.5 text-xs text-gray-400"></p>
-            </div>
-
-            <button
-                type="button"
-                onclick="closeDashboardDetail()"
-                class="text-gray-400 hover:text-gray-600 text-xl leading-none"
-                aria-label="Tutup detail"
-            >
-                &times;
-            </button>
-        </div>
-
-        {{-- Body Modal (Scrollable) --}}
-        <div id="dashboardModalBody" class="px-4 py-3 overflow-y-auto flex-1 space-y-3">
-            <!-- Konten diisi lewat JS -->
-        </div>
-
-        {{-- Footer Modal --}}
-        <div id="dashboardModalActions" class="px-4 py-3 border-t bg-gray-50 shrink-0">
-            <!-- Tombol aksi diisi lewat JS -->
-        </div>
-    </div>
-</div>
-
-{{-- Modal Detail Pembuatan Form Kehadiran --}}
-{{-- Gaya kartu & seksi modal ini disamakan dengan modal Detail Reservasi
-     (Ruang Rapat & Breakout Room Zoom) di atas, supaya tampilan detail
-     konsisten di semua jenis reservasi pada Dashboard. --}}
-<div
-    id="dashboardFormDetailModal"
-    class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-4"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="formModalTitle"
->
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[85vh] flex flex-col overflow-hidden border">
-
-        {{-- Header Modal --}}
-        <div class="flex justify-between items-center px-4 py-3 border-b bg-gray-50 shrink-0">
-            <div>
-                <h4 id="formModalTitle" class="font-bold text-gray-800 text-sm">Detail Pembuatan Form</h4>
-                <p id="formModalIdText" class="mt-0.5 text-xs text-gray-400"></p>
-            </div>
-
-            <button
-                type="button"
-                onclick="closeFormDetailModal()"
-                class="text-gray-400 hover:text-gray-600 text-xl leading-none"
-                aria-label="Tutup detail"
-            >
-                &times;
-            </button>
-        </div>
-
-        {{-- Body Modal (Scrollable) --}}
-        <div id="formModalBody" class="px-4 py-3 overflow-y-auto flex-1 space-y-3">
-            <!-- Konten diisi lewat JS -->
-        </div>
-
-        {{-- Footer Modal --}}
-        <div id="formModalActions" class="px-4 py-3 border-t bg-gray-50 shrink-0">
-            <!-- Tombol aksi diisi lewat JS -->
-        </div>
-    </div>
-</div>
+{{-- Modal Detail Reservasi (bersama dengan Semua Pemesanan Admin) --}}
+@include('partials.reservation-detail-modal')
 
 <script>
-    function dashboardSetText(id, value) {
-        document.getElementById(id).textContent = value ?? '-';
-    }
-
-    // Gaya kartu & seksi di bawah ini disamakan dengan modal Detail Reservasi
-    // pada halaman Semua Pemesanan (Admin).
-    const dashboardEscapeHtml = (str) => String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-    const dashboardRow = (label, value) => {
-        if (value === null || value === undefined || value === '') return '';
-        return `
-            <div class="flex justify-between gap-2 py-1 border-b border-gray-100 last:border-0 text-[11px]">
-                <span class="text-gray-500 font-medium shrink-0">${label}</span>
-                <span class="font-semibold text-gray-800 text-right truncate">${dashboardEscapeHtml(value)}</span>
-            </div>
-        `;
-    };
-
-    const dashboardSection = (title, rowsHtml) => {
-        const filled = rowsHtml.filter(Boolean).join('');
-        if (!filled) return '';
-        return `
-            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs flex flex-col justify-between">
-                <div>
-                    <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">${title}</p>
-                    <div class="space-y-0.5">${filled}</div>
-                </div>
-            </div>
-        `;
-    };
-
-    function openDashboardDetail(res) {
-        document.getElementById('dashboardModalTitle').innerText = `Detail Reservasi ${res.id}`;
-        document.getElementById('dashboardModalId').textContent = '';
-
-        const statusLabels = {
-            mendatang: 'Mendatang',
-            selesai: 'Selesai',
-            menunggu_pembatalan: 'Menunggu Pembatalan',
-            dibatalkan: 'Dibatalkan',
-        };
-
-        const isRoom = res.jenis_raw === 'room';
-
-        const sections = [
-            dashboardSection('Informasi Reservasi', [
-                dashboardRow('Kode', res.id),
-                dashboardRow('Jenis', res.jenis),
-                dashboardRow('Ruangan / Platform', res.ruang),
-                dashboardRow('Tanggal', res.tanggal),
-                dashboardRow('Waktu', res.waktu),
-                // Jumlah Peserta & Konsumsi hanya relevan untuk Ruang Rapat.
-                isRoom ? dashboardRow('Peserta', res.jumlah_peserta ? res.jumlah_peserta + ' orang' : null) : '',
-                isRoom ? dashboardRow('Konsumsi', res.konsumsi) : '',
-                dashboardRow('Keperluan / Agenda', res.keperluan),
-            ]),
-
-            dashboardSection('Penanggung Jawab', [
-                dashboardRow('Nama PIC', res.nama_pic),
-                dashboardRow('No. Telp PIC', res.no_telp_pic),
-                dashboardRow('Divisi PIC', res.divisi_pic),
-            ]),
-
-            dashboardSection('Pemesanan', [
-                dashboardRow('Status', statusLabels[res.status] ?? res.status),
-                dashboardRow('Dibuat', res.created_at),
-            ]),
-        ];
-
-        // Broadcast & Link Zoom — hanya untuk reservasi Breakout Room Zoom,
-        // supaya teks undangan + link Zoom bisa langsung disalin dari Dashboard.
-        const broadcastBlock = (res.jenis_raw === 'zoom' && res.broadcast) ? `
-            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs sm:col-span-2">
-                <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Broadcast &amp; Link Zoom</p>
-                <div id="dashboardBroadcastText" class="whitespace-pre-wrap rounded-md border border-gray-100 bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-700 select-all">${dashboardEscapeHtml(res.broadcast)}</div>
-                <button
-                    type="button"
-                    onclick="copyDashboardBroadcast()"
-                    id="dashboardCopyBroadcastBtn"
-                    class="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
-                >
-                    Salin Broadcast
-                </button>
-            </div>
-        ` : '';
-
-        document.getElementById('dashboardModalBody').innerHTML = `
-            <div class="mb-2">
-                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    ${dashboardEscapeHtml(statusLabels[res.status] ?? res.status)}
-                </span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                ${sections.join('')}
-                ${broadcastBlock}
-            </div>
-        `;
-
-        // Tombol menuju link Zoom — hanya untuk reservasi Breakout Room Zoom.
-        const zoomButtonHtml = (res.jenis_raw === 'zoom' && res.zoom_link) ? `
-            <a
-                href="${dashboardEscapeHtml(res.zoom_link)}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="w-full block text-center py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-bold text-xs transition-colors"
-            >
-                Menuju Link Zoom
-            </a>
-        ` : '';
-
-        // Ajukan Pembatalan — hanya untuk reservasi yang masih "mendatang" dan
-        // memang punya mekanisme pembatalan (Ruang Rapat / Breakout Room Zoom).
-        const canCancel = res.can_cancel && res.status === 'mendatang' && res.raw_id;
-        const cancelButtonHtml = canCancel ? `
-            <button
-                type="button"
-                onclick="closeDashboardDetail(); openCancelConfirm('${res.jenis_raw}', ${res.raw_id}, ${JSON.stringify(res.id)})"
-                class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-xs transition-colors shadow-sm"
-            >
-                Ajukan Pembatalan
-            </button>
-        ` : '';
-
-        document.getElementById('dashboardModalActions').innerHTML = (zoomButtonHtml || cancelButtonHtml) ? `
-            <div class="flex flex-col gap-2">
-                ${zoomButtonHtml}
-                ${cancelButtonHtml}
-            </div>
-        ` : '';
-
-        const modal = document.getElementById('dashboardDetailModal');
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeDashboardDetail() {
-        const modal = document.getElementById('dashboardDetailModal');
-
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    // ------------------------------------------------------------------
-    // Salin Broadcast Zoom (dari modal Detail Reservasi Dashboard)
-    // ------------------------------------------------------------------
-    function copyDashboardBroadcast() {
-        const el = document.getElementById('dashboardBroadcastText');
-        const btn = document.getElementById('dashboardCopyBroadcastBtn');
-        if (!el || !btn) return;
-
-        const text = el.textContent;
-
-        function markCopied() {
-            btn.innerText = 'Berhasil Disalin!';
-            setTimeout(() => { btn.innerText = 'Salin Broadcast'; }, 2000);
-        }
-
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).then(markCopied).catch(() => copyDashboardBroadcastFallback(text, markCopied));
-        } else {
-            copyDashboardBroadcastFallback(text, markCopied);
-        }
-    }
-
-    function copyDashboardBroadcastFallback(text, onSuccess) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        try {
-            if (document.execCommand('copy')) {
-                onSuccess();
-            } else {
-                alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
-            }
-        } catch (e) {
-            alert('Gagal menyalin otomatis. Silakan salin teks di atas secara manual.');
-        }
-        document.body.removeChild(textarea);
-    }
-
-    // ------------------------------------------------------------------
-    // Modal Detail Pembuatan Form Kehadiran
-    // (gaya disamakan dengan openDashboardDetail di atas)
-    // ------------------------------------------------------------------
-    function openFormDetailModal(res) {
-        document.getElementById('formModalTitle').innerText = `Detail Pembuatan Form ${res.id}`;
-        document.getElementById('formModalIdText').textContent = '';
-
-        const statusLabels = {
-            mendatang: 'Formulir Aktif',
-            selesai: 'Sudah Kedaluwarsa',
-        };
-
-        const statusColor = res.status === 'mendatang' ? 'emerald' : 'slate';
-
-        const sections = [
-            dashboardSection('Informasi Form', [
-                dashboardRow('Kode', res.id),
-                dashboardRow('Judul Form', res.judul),
-                dashboardRow('Tempat', res.tempat),
-                dashboardRow('Rapat / Pertemuan', res.rapat),
-                dashboardRow('Kedaluwarsa', res.expires_label),
-            ]),
-
-            dashboardSection('Penanggung Jawab', [
-                dashboardRow('Nama PIC', res.pic),
-                dashboardRow('Divisi PIC', res.divisi_pic),
-            ]),
-
-            dashboardSection('Pemesanan', [
-                dashboardRow('Status', statusLabels[res.status] ?? res.status),
-                dashboardRow('Dibuat', res.created_at),
-            ]),
-        ];
-
-        // Link Formulir — ditampilkan sebagai kotak yang bisa disalin,
-        // sama seperti kotak Broadcast & Link Zoom di modal Detail Reservasi.
-        const linkBlock = res.link ? `
-            <div class="rounded-lg border border-gray-200 bg-white p-2.5 shadow-xs sm:col-span-2">
-                <p class="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-600">Link Formulir</p>
-                <div id="formModalLinkText" class="whitespace-pre-wrap rounded-md border border-gray-100 bg-gray-50 p-2 font-mono text-[11px] leading-relaxed text-gray-700 select-all">${dashboardEscapeHtml(res.link)}</div>
-                <button
-                    type="button"
-                    onclick="copyFormDetailLink()"
-                    id="formModalCopyLinkBtn"
-                    data-link="${dashboardEscapeHtml(res.link)}"
-                    class="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-bold text-white shadow-sm transition-colors hover:bg-emerald-700"
-                >
-                    Salin Link Formulir
-                </button>
-            </div>
-        ` : '';
-
-        document.getElementById('formModalBody').innerHTML = `
-            <div class="mb-2">
-                <span class="inline-flex items-center gap-1 rounded-full bg-${statusColor}-50 px-2.5 py-0.5 text-[11px] font-bold text-${statusColor}-700 border border-${statusColor}-200">
-                    <span class="h-1.5 w-1.5 rounded-full bg-${statusColor}-500"></span>
-                    ${dashboardEscapeHtml(statusLabels[res.status] ?? res.status)}
-                </span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                ${sections.join('')}
-                ${linkBlock}
-            </div>
-        `;
-
-        // Tombol "Buka Formulir" — hanya muncul kalau link tersedia.
-        const openLinkButtonHtml = res.link ? `
-            <a
-                href="${dashboardEscapeHtml(res.link)}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="w-full block text-center py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-bold text-xs transition-colors"
-            >
-                Buka Formulir
-            </a>
-        ` : '';
-
-        document.getElementById('formModalActions').innerHTML = openLinkButtonHtml ? `
-            <div class="flex flex-col gap-2">
-                ${openLinkButtonHtml}
-            </div>
-        ` : '';
-
-        const modal = document.getElementById('dashboardFormDetailModal');
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
-    function closeFormDetailModal() {
-        const modal = document.getElementById('dashboardFormDetailModal');
-
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-    }
-
-    function copyFormDetailLink() {
-        const btn = document.getElementById('formModalCopyLinkBtn');
-        const link = btn?.dataset.link;
-        if (!link) return;
-
-        function markCopied() {
-            btn.textContent = 'Berhasil Disalin!';
-            setTimeout(() => { btn.textContent = 'Salin Link Formulir'; }, 2000);
-        }
-
-        // navigator.clipboard hanya tersedia di HTTPS atau localhost/127.0.0.1.
-        // Saat diakses lewat IP LAN via HTTP biasa, ini bisa undefined dan gagal diam-diam.
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(link).then(markCopied).catch(() => copyFormDetailLinkFallback(link, markCopied));
-        } else {
-            copyFormDetailLinkFallback(link, markCopied);
-        }
-    }
-
-    function copyFormDetailLinkFallback(link, onSuccess) {
-        const textarea = document.createElement('textarea');
-        textarea.value = link;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        try {
-            if (document.execCommand('copy')) {
-                onSuccess();
-            } else {
-                alert('Gagal menyalin otomatis. Salin manual: ' + link);
-            }
-        } catch (e) {
-            alert('Gagal menyalin otomatis. Salin manual: ' + link);
-        }
-        document.body.removeChild(textarea);
+    // Dipanggil modal detail bersama saat tombol "Ajukan Pembatalan" diklik.
+    function reservationDetailCancel(res) {
+        closeReservationDetail();
+        openCancelConfirm(res.cancel.jenis, res.cancel.raw_id, res.kode);
     }
 
     // ------------------------------------------------------------------
@@ -905,8 +458,6 @@
     // Tutup modal jika pengguna menekan tombol Escape.
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
-            closeDashboardDetail();
-            closeFormDetailModal();
             closeCancelConfirm();
         }
     });

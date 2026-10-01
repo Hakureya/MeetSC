@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceForm;
 use App\Models\RoomReservation;
 use App\Models\ZoomReservation;
+use App\Support\ReservationDetail;
 use Illuminate\Http\Request;
 
 class ReservationManagementController extends Controller
@@ -36,7 +37,7 @@ class ReservationManagementController extends Controller
 
         $rooms = ($jenis && $jenis !== 'Ruang') ? collect() : $roomQuery->get()->map(function ($item) {
             return [
-                'id' => 'BK' . str_pad($item->id, 3, '0', STR_PAD_LEFT),
+                'id' => 'RM-' . $item->id,
                 'raw_id' => $item->id,
                 'pemesan' => $item->user->name,
                 'user' => $item->user,
@@ -64,13 +65,15 @@ class ReservationManagementController extends Controller
                 'can_cancel' => true,
                 'broadcast' => null,
                 'zoom_link' => null,
+                // Data modal detail bersama (sama dengan Dashboard), plus Informasi Pemesan.
+                'detail' => ReservationDetail::room($item, 'RM-' . $item->id, ['pemesan' => true, 'cancel' => 'admin']),
                 'raw_item' => $item,
             ];
         });
 
         $zooms = ($jenis && $jenis !== 'Zoom') ? collect() : $zoomQuery->get()->map(function ($item) {
             return [
-                'id' => 'ZM' . str_pad($item->id, 3, '0', STR_PAD_LEFT),
+                'id' => 'ZM-' . $item->id,
                 'raw_id' => $item->id,
                 'pemesan' => $item->user->name,
                 'user' => $item->user,
@@ -97,6 +100,8 @@ class ReservationManagementController extends Controller
                 'can_cancel' => true,
                 'broadcast' => $item->broadcast_text,
                 'zoom_link' => \App\Models\ZoomReservation::MEETING_URL,
+                // Data modal detail bersama (sama dengan Dashboard), plus Informasi Pemesan.
+                'detail' => ReservationDetail::zoom($item, 'ZM-' . $item->id, ['pemesan' => true, 'cancel' => 'admin']),
                 'raw_item' => $item,
             ];
         });
@@ -107,7 +112,7 @@ class ReservationManagementController extends Controller
             $formStatus = $item->isExpired() ? 'selesai' : 'mendatang';
 
             return [
-                'id' => 'FM' . str_pad($item->id, 3, '0', STR_PAD_LEFT),
+                'id' => 'FM-' . $item->id,
                 'raw_id' => $item->id,
                 'pemesan' => $item->user->name ?? '-',
                 'user' => $item->user,
@@ -135,6 +140,9 @@ class ReservationManagementController extends Controller
                 'can_cancel' => false,
                 'broadcast' => null,
                 'zoom_link' => null,
+
+                // Data modal detail bersama (sama dengan Dashboard), plus Informasi Pemesan.
+                'detail' => ReservationDetail::form($item, 'FM-' . $item->id, ['pemesan' => true]),
                 'raw_item' => $item,
             ];
         })->when($status, fn ($collection) => $collection->where('status', $status));

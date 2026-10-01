@@ -137,7 +137,7 @@ class ScheduleController extends Controller
                 // → halaman Semua Pemesanan, karena Dashboard hanya memuat reservasi milik sendiri.
                 'dashboard_url' => $isOwner
                     ? route('dashboard', ['search' => 'ZM-'.$r->id])
-                    : route('reservations.index', ['search' => 'ZM'.str_pad($r->id, 3, '0', STR_PAD_LEFT)]),
+                    : route('reservations.index', ['search' => 'ZM-'.$r->id]),
                 'dashboard_label' => $isOwner ? 'Lihat di Dashboard' : 'Lihat di Semua Pemesanan',
             ];
         })->all();

@@ -49,7 +49,7 @@
                         Cari User
                     </label>
                     <input type="text" name="search" value="{{ request('search') }}"
-                        placeholder="Nama, NIP/NIM, divisi..."
+                        placeholder="Nama, NIP/NIM..."
                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm">
                 </div>
 
@@ -201,15 +201,16 @@
                                                     Reset Password
                                                 </button>
                                             </div>
-                                            <div class="py-1">
-                                                <form action="{{ route('users.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus user ini selamanya?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition">
+                                            {{-- Tombol hapus disembunyikan di akun sendiri. --}}
+                                            @if($u->id !== auth()->id())
+                                                <div class="py-1">
+                                                    <button type="button"
+                                                            onclick="openDeleteUserModal({{ $u->id }}, @js($u->name))"
+                                                            class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 transition">
                                                         Hapus User
                                                     </button>
-                                                </form>
-                                            </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     </template>
                                 </div>
@@ -395,6 +396,49 @@
     </div>
 </div>
 
+{{-- Modal Konfirmasi Hapus User (menggantikan confirm() bawaan browser) --}}
+<div
+    id="deleteUserModal"
+    class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/50 p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deleteUserTitle"
+>
+    <div class="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+
+        <h3 id="deleteUserTitle" class="mt-4 text-lg font-bold text-slate-900">Hapus Akun?</h3>
+        <p class="mt-1.5 text-sm text-slate-500">
+            Akun <span id="deleteUserName" class="font-semibold text-slate-800"></span>
+            akan dihapus selamanya dan tidak dapat dikembalikan.
+        </p>
+
+        <div class="mt-6 flex gap-3">
+            <button
+                type="button"
+                onclick="closeDeleteUserModal()"
+                class="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+                Batal
+            </button>
+            <button
+                type="button"
+                onclick="submitDeleteUser()"
+                class="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
+            >
+                Ya, Hapus Akun
+            </button>
+        </div>
+    </div>
+</div>
+
+<form id="deleteUserForm" method="POST" class="hidden">
+    @csrf
+    @method('DELETE')
+</form>
+
 <script>
 function showUserDetail(user) {
     const createdAt = user.created_at ? new Date(user.created_at).toLocaleDateString('id-ID', {
@@ -451,6 +495,37 @@ document.getElementById('formResetPassword').addEventListener('submit', function
         errorEl.textContent = 'Konfirmasi password tidak cocok dengan password baru.';
         errorEl.classList.remove('hidden');
     }
+});
+
+// ------------------------------------------------------------------
+// Modal Konfirmasi Hapus User
+// ------------------------------------------------------------------
+function openDeleteUserModal(id, name) {
+    document.getElementById('deleteUserForm').action = `/manajemen-user/${id}`;
+    // textContent (bukan innerHTML) supaya nama akun aman dari karakter HTML.
+    document.getElementById('deleteUserName').textContent = `"${name}"`;
+
+    const modal = document.getElementById('deleteUserModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeDeleteUserModal() {
+    const modal = document.getElementById('deleteUserModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function submitDeleteUser() {
+    document.getElementById('deleteUserForm').submit();
+}
+
+document.getElementById('deleteUserModal').addEventListener('click', function (event) {
+    if (event.target === this) closeDeleteUserModal();
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeDeleteUserModal();
 });
 </script>
 </x-layouts.app>
