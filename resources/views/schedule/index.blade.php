@@ -844,7 +844,9 @@
 
     tick(true);
     setInterval(tick, 1000);
-    setInterval(refresh, 60000);        // jaring pengaman kalau koneksi realtime sempat putus
+    // jaring pengaman kalau koneksi realtime sempat putus; tab yang tersembunyi dilewati
+    // (refresh otomatis saat tab kembali terlihat, lihat visibilitychange di bawah)
+    setInterval(() => { if (!document.hidden) refresh(); }, 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
 
     // ---------------------------------------------------------------- realtime (Reverb)

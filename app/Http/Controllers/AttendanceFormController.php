@@ -17,8 +17,8 @@ class AttendanceFormController extends Controller
         // Riwayat form ditampilkan maksimal 5 per halaman, dengan pagination
         // jika jumlah form lebih dari itu.
         $forms = ($user->role === 'admin')
-            ? AttendanceForm::with(['user', 'responses'])->latest()->paginate(5)
-            : AttendanceForm::with('responses')->where('user_id', $user->id)->latest()->paginate(5);
+            ? AttendanceForm::with('user')->latest()->paginate(5)
+            : AttendanceForm::where('user_id', $user->id)->latest()->paginate(5);
 
         return view('attendance.index', compact('forms'));
     }

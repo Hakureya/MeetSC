@@ -19,7 +19,6 @@ class ZoomReservationController extends Controller
         $date = $request->get('tanggal');
         $reservations = ZoomReservation::whereDate('tanggal', $date)
             ->whereIn('status', ['mendatang', 'selesai', 'menunggu_pembatalan'])
-            ->with('user')
             ->get(['id', 'nama_agenda', 'nama_pic', 'tanggal', 'jam_mulai', 'jam_selesai', 'room_number', 'user_id']);
 
         return response()->json($reservations);

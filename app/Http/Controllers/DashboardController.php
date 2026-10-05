@@ -7,6 +7,7 @@ use App\Models\AttendanceForm;
 use App\Models\RoomReservation;
 use App\Models\ZoomReservation;
 use App\Support\ReservationDetail;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -15,235 +16,93 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         $user = $request->user();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Reservasi Saat Ini / Mendatang
-        |--------------------------------------------------------------------------
-        */
-
         $today = now()->toDateString();
 
-        // Reservasi ruang untuk HARI INI saja. Reservasi turunan ruang gabungan
-        // dikecualikan supaya satu pemesanan gabungan tetap tampil sebagai satu kartu.
-        $todayRoomReservations = $user->roomReservations()
-            ->with(['room', 'childReservations.room'])
-            ->where('status', 'mendatang')
-            ->whereDate('tanggal', $today)
-            ->where('auto_generated', false)
-            ->orderBy('jam_mulai')
-            ->get();
-
-        $todayZoomReservations = $user->zoomReservations()
-            ->where('status', 'mendatang')
-            ->whereDate('tanggal', $today)
-            ->orderBy('jam_mulai')
-            ->get();
-
-        // Gabungkan keduanya menjadi satu daftar kartu, diurutkan berdasarkan jam mulai.
-        $todayReservations = collect();
-
-        foreach ($todayRoomReservations as $r) {
-            $todayReservations->push([
-                'id' => 'RM-' . $r->id,
-                'jenis' => 'room',
-                'jenis_label' => 'Ruang Rapat',
-                'ruangan' => $r->room->name ?? '-',
-                'keperluan' => $r->keperluan ?? '-',
-                'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
-                'jam_mulai' => $r->jam_mulai,
-                'waktu' => $r->jam_range,
-                'status' => $r->status,
-                'jumlah_peserta' => $r->jumlah_peserta,
-                'konsumsi' => $r->konsumsi,
-                'nama_pic' => $r->nama_pic,
-                'no_telp_pic' => $r->no_telp_pic,
-                'divisi_pic' => $r->divisi_pic,
-                'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
-                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
-                'detail' => ReservationDetail::room($r, 'RM-' . $r->id),
-                'broadcast' => null,
-                'zoom_link' => null,
-            ]);
-        }
-
-        foreach ($todayZoomReservations as $r) {
-            $todayReservations->push([
-                'id' => 'ZM-' . $r->id,
-                'jenis' => 'zoom',
-                'jenis_label' => 'Breakout Room Zoom',
-                'ruangan' => 'Zoom Ruang ' . $r->room_number,
-                'keperluan' => $r->nama_agenda ?? '-',
-                'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
-                'jam_mulai' => $r->jam_mulai,
-                'waktu' => $r->jam_range,
-                'status' => $r->status,
-                'jumlah_peserta' => null,
-                'konsumsi' => null,
-                'nama_pic' => $r->nama_pic,
-                'no_telp_pic' => $r->no_telp_pic,
-                'divisi_pic' => $r->divisi_pic,
-                'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
-                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
-                'detail' => ReservationDetail::zoom($r, 'ZM-' . $r->id),
-                'broadcast' => $r->broadcast_text,
-                'zoom_link' => \App\Models\ZoomReservation::ZOOM_LINK,
-            ]);
-        }
-
-        $todayReservations = $todayReservations->sortBy('jam_mulai')->values();
-
         /*
         |--------------------------------------------------------------------------
-        | Aktivitas Saya
+        | Ambil Data (satu query per tabel)
         |--------------------------------------------------------------------------
-        */
-
-        $recentRoomReservations = $user->roomReservations()
-            ->with('room')
-            ->latest()
-            ->take(5)
-            ->get();
-
-        $recentZoomReservations = $user->zoomReservations()
-            ->latest()
-            ->take(5)
-            ->get();
-
-        $recentAttendanceForms = $user->attendanceForms()
-            ->latest()
-            ->take(5)
-            ->get();
-
-        /*
-        |--------------------------------------------------------------------------
-        | Semua Reservasi Saya
-        |--------------------------------------------------------------------------
+        | Reservasi turunan ruang gabungan dikecualikan supaya satu pemesanan gabungan
+        | tetap tampil sebagai satu baris. Relasi yang berat (childReservations) TIDAK
+        | di-eager-load di sini; hanya dimuat untuk baris yang benar-benar ditampilkan.
         */
 
         $roomReservations = $user->roomReservations()
-            ->with(['room', 'childReservations.room'])
+            ->with('room')
             ->where('auto_generated', false)
             ->get();
 
-        $zoomReservations = $user->zoomReservations()
-            ->get();
+        $zoomReservations = $user->zoomReservations()->get();
 
-        $attendanceForms = $user->attendanceForms()
-            ->get();
-
-        $reservations = collect();
+        $attendanceForms = $user->attendanceForms()->get();
 
         /*
         |--------------------------------------------------------------------------
-        | Format Reservasi Ruang Meeting
+        | Baris Ringan
         |--------------------------------------------------------------------------
+        | Hanya field yang dibutuhkan untuk filter, pengurutan, dan pagination, plus
+        | referensi model. Array lengkap (modal detail, teks broadcast, dsb.) baru
+        | dibangun setelah pagination, hanya untuk baris yang tampil.
         */
+
+        $rows = collect();
 
         foreach ($roomReservations as $r) {
-            $reservations->push([
+            $rows->push([
                 'id' => 'RM-' . $r->id,
-                'raw_id' => $r->id,
                 'jenis' => 'room',
-                'jenis_label' => 'Ruang Rapat',
                 'ruangan' => $r->room->name ?? '-',
                 'keperluan' => $r->keperluan ?? '-',
-                'tanggal' => $r->tanggal->format('d/m/Y'),
-                'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
-                'tanggal_raw' => $r->tanggal,
-                'waktu' => $r->jam_range,
                 'status' => $r->status,
+                'jam_mulai' => $r->jam_mulai,
+                'tanggal_raw' => $r->tanggal,
                 'created_at' => $r->created_at,
-                'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
-                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
-                'detail' => ReservationDetail::room($r, 'RM-' . $r->id, ['cancel' => 'request']),
-                'jumlah_peserta' => $r->jumlah_peserta,
-                'konsumsi' => $r->konsumsi,
-                'nama_pic' => $r->nama_pic,
-                'no_telp_pic' => $r->no_telp_pic,
-                'divisi_pic' => $r->divisi_pic,
-                'can_cancel' => true,
-                'broadcast' => null,
-                'zoom_link' => null,
+                'model' => $r,
             ]);
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Format Reservasi Zoom
-        |--------------------------------------------------------------------------
-        */
 
         foreach ($zoomReservations as $r) {
-            $reservations->push([
+            $rows->push([
                 'id' => 'ZM-' . $r->id,
-                'raw_id' => $r->id,
                 'jenis' => 'zoom',
-                'jenis_label' => 'Breakout Room Zoom',
                 'ruangan' => 'Ruang ' . $r->room_number,
                 'keperluan' => $r->nama_agenda ?? '-',
-                'tanggal' => $r->tanggal->format('d/m/Y'),
-                'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
-                'tanggal_raw' => $r->tanggal,
-                'waktu' => $r->jam_range,
                 'status' => $r->status,
+                'jam_mulai' => $r->jam_mulai,
+                'tanggal_raw' => $r->tanggal,
                 'created_at' => $r->created_at,
-                'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
-                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
-                'detail' => ReservationDetail::zoom($r, 'ZM-' . $r->id, ['cancel' => 'request']),
-                'jumlah_peserta' => null,
-                'konsumsi' => null,
-                'nama_pic' => $r->nama_pic,
-                'no_telp_pic' => $r->no_telp_pic,
-                'divisi_pic' => $r->divisi_pic,
-                'can_cancel' => true,
-                'broadcast' => $r->broadcast_text,
-                'zoom_link' => \App\Models\ZoomReservation::ZOOM_LINK,
+                'model' => $r,
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Format Riwayat Form Kehadiran
-        |--------------------------------------------------------------------------
-        */
-
         foreach ($attendanceForms as $f) {
-            $reservations->push([
+            $rows->push([
                 'id' => 'FM-' . $f->id,
-                'raw_id' => $f->id,
                 'jenis' => 'form',
-                'jenis_label' => 'Form Kehadiran',
                 'ruangan' => $f->tempat ?? '-',
                 // Kolom keperluan untuk form diisi dari atribut rapat/agenda form.
                 'keperluan' => $f->rapat_pertemuan ?? '-',
-                'tanggal' => $f->created_at->format('d/m/Y'),
-                'tanggal_lengkap' => $f->created_at->translatedFormat('d F Y'),
-                'tanggal_raw' => $f->created_at,
-                'waktu' => $f->expires_at ? 'Kedaluwarsa ' . $f->expires_at->format('d/m/Y H:i') : '-',
                 'status' => $f->isExpired() ? 'selesai' : 'mendatang',
+                'jam_mulai' => null,
+                'tanggal_raw' => $f->created_at,
                 'created_at' => $f->created_at,
-                'created_at_label' => $f->created_at->translatedFormat('d F Y, H:i') . ' WIB',
-                // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
-                'detail' => ReservationDetail::form($f, 'FM-' . $f->id),
-                'jumlah_peserta' => null,
-                'konsumsi' => null,
-                'nama_pic' => null,
-                'no_telp_pic' => null,
-                'divisi_pic' => $f->divisi_pic,
-                'can_cancel' => false,
-                'detail_url' => route('attendance.show', $f->id),
-
-                // Detail pembuatan form, ditampilkan di modal "Lihat Detail"
-                // pada dashboard (bukan navigasi ke halaman respons).
-                'form_pic' => $f->pic,
-                'form_divisi_pic' => $f->divisi_pic,
-                'form_tempat' => $f->tempat,
-                'form_rapat' => $f->rapat_pertemuan,
-                'form_expires_label' => $f->expires_at ? $f->expires_at->translatedFormat('d F Y, H:i') . ' WIB' : '-',
-                'form_link' => route('attendance.public', $f->uuid),
+                'model' => $f,
             ]);
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reservasi Hari Ini (kartu di atas)
+        |--------------------------------------------------------------------------
+        | Diambil dari data yang sudah dimuat -- tidak perlu query tambahan.
+        */
+
+        $todayRows = $rows
+            ->filter(fn ($r) => in_array($r['jenis'], ['room', 'zoom'], true)
+                && $r['status'] === 'mendatang'
+                && $r['tanggal_raw']->toDateString() === $today)
+            ->sortBy('jam_mulai')
+            ->values();
 
         /*
         |--------------------------------------------------------------------------
@@ -254,7 +113,7 @@ class DashboardController extends Controller
         if ($request->filled('search')) {
             $search = strtolower($request->search);
 
-            $reservations = $reservations->filter(function ($r) use ($search) {
+            $rows = $rows->filter(function ($r) use ($search) {
                 return str_contains(strtolower($r['id']), $search)
                     || str_contains(strtolower($r['ruangan']), $search)
                     || str_contains(strtolower($r['keperluan']), $search);
@@ -268,10 +127,7 @@ class DashboardController extends Controller
         */
 
         if ($request->filled('jenis')) {
-            $reservations = $reservations->where(
-                'jenis',
-                $request->jenis
-            );
+            $rows = $rows->where('jenis', $request->jenis);
         }
 
         /*
@@ -281,10 +137,7 @@ class DashboardController extends Controller
         */
 
         if ($request->filled('status')) {
-            $reservations = $reservations->where(
-                'status',
-                $request->status
-            );
+            $rows = $rows->where('status', $request->status);
         }
 
         /*
@@ -294,14 +147,14 @@ class DashboardController extends Controller
         */
 
         if ($request->filled('tanggal_mulai')) {
-            $reservations = $reservations->filter(function ($r) use ($request) {
+            $rows = $rows->filter(function ($r) use ($request) {
                 return $r['tanggal_raw']->format('Y-m-d')
                     >= $request->tanggal_mulai;
             });
         }
 
         if ($request->filled('tanggal_akhir')) {
-            $reservations = $reservations->filter(function ($r) use ($request) {
+            $rows = $rows->filter(function ($r) use ($request) {
                 return $r['tanggal_raw']->format('Y-m-d')
                     <= $request->tanggal_akhir;
             });
@@ -315,17 +168,17 @@ class DashboardController extends Controller
 
         $sort = $request->get('sort', 'terbaru');
 
-        $reservations = match ($sort) {
-            'terlama' => $reservations->sortBy('created_at'),
+        $rows = match ($sort) {
+            'terlama' => $rows->sortBy('created_at'),
 
-            'tanggal_asc' => $reservations->sortBy('tanggal_raw'),
+            'tanggal_asc' => $rows->sortBy('tanggal_raw'),
 
-            'tanggal_desc' => $reservations->sortByDesc('tanggal_raw'),
+            'tanggal_desc' => $rows->sortByDesc('tanggal_raw'),
 
-            default => $reservations->sortByDesc('created_at'),
+            default => $rows->sortByDesc('created_at'),
         };
 
-        $reservations = $reservations->values();
+        $rows = $rows->values();
 
         /*
         |--------------------------------------------------------------------------
@@ -337,9 +190,37 @@ class DashboardController extends Controller
 
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
+        $pageRows = $rows->forPage($currentPage, $perPage);
+
+        // Muat ruang komponen (ruang gabungan) sekali saja untuk SEMUA baris yang akan
+        // ditampilkan: kartu hari ini + halaman tabel saat ini.
+        (new EloquentCollection(
+            $todayRows->merge($pageRows)
+                ->where('jenis', 'room')
+                ->pluck('model')
+                ->unique('id')
+                ->all()
+        ))->load('childReservations.room');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bentuk Array Lengkap Hanya untuk Baris yang Tampil
+        |--------------------------------------------------------------------------
+        */
+
+        $todayReservations = $todayRows
+            ->map(fn ($row) => $row['jenis'] === 'room'
+                ? $this->todayRoomCard($row['model'])
+                : $this->todayZoomCard($row['model']))
+            ->values();
+
         $paginatedReservations = new LengthAwarePaginator(
-            $reservations->forPage($currentPage, $perPage),
-            $reservations->count(),
+            $pageRows->map(fn ($row) => match ($row['jenis']) {
+                'room' => $this->roomRow($row['model']),
+                'zoom' => $this->zoomRow($row['model']),
+                default => $this->formRow($row['model']),
+            }),
+            $rows->count(),
             $perPage,
             $currentPage,
             [
@@ -348,21 +229,162 @@ class DashboardController extends Controller
             ]
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kirim Data ke Dashboard
-        |--------------------------------------------------------------------------
-        */
-
         return view('dashboard', [
             'todayReservations' => $todayReservations,
-
-            'recentRoomReservations' => $recentRoomReservations,
-            'recentZoomReservations' => $recentZoomReservations,
-            'recentAttendanceForms' => $recentAttendanceForms,
-
             'reservations' => $paginatedReservations,
         ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pembentuk Array Tampilan
+    |--------------------------------------------------------------------------
+    */
+
+    private function todayRoomCard(RoomReservation $r): array
+    {
+        return [
+            'id' => 'RM-' . $r->id,
+            'jenis' => 'room',
+            'jenis_label' => 'Ruang Rapat',
+            'ruangan' => $r->room->name ?? '-',
+            'keperluan' => $r->keperluan ?? '-',
+            'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
+            'jam_mulai' => $r->jam_mulai,
+            'waktu' => $r->jam_range,
+            'status' => $r->status,
+            'jumlah_peserta' => $r->jumlah_peserta,
+            'konsumsi' => $r->konsumsi,
+            'nama_pic' => $r->nama_pic,
+            'no_telp_pic' => $r->no_telp_pic,
+            'divisi_pic' => $r->divisi_pic,
+            'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+            // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+            'detail' => ReservationDetail::room($r, 'RM-' . $r->id),
+            'broadcast' => null,
+            'zoom_link' => null,
+        ];
+    }
+
+    private function todayZoomCard(ZoomReservation $r): array
+    {
+        return [
+            'id' => 'ZM-' . $r->id,
+            'jenis' => 'zoom',
+            'jenis_label' => 'Breakout Room Zoom',
+            'ruangan' => 'Zoom Ruang ' . $r->room_number,
+            'keperluan' => $r->nama_agenda ?? '-',
+            'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
+            'jam_mulai' => $r->jam_mulai,
+            'waktu' => $r->jam_range,
+            'status' => $r->status,
+            'jumlah_peserta' => null,
+            'konsumsi' => null,
+            'nama_pic' => $r->nama_pic,
+            'no_telp_pic' => $r->no_telp_pic,
+            'divisi_pic' => $r->divisi_pic,
+            'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+            // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+            'detail' => ReservationDetail::zoom($r, 'ZM-' . $r->id),
+            'broadcast' => $r->broadcast_text,
+            'zoom_link' => ZoomReservation::ZOOM_LINK,
+        ];
+    }
+
+    private function roomRow(RoomReservation $r): array
+    {
+        return [
+            'id' => 'RM-' . $r->id,
+            'raw_id' => $r->id,
+            'jenis' => 'room',
+            'jenis_label' => 'Ruang Rapat',
+            'ruangan' => $r->room->name ?? '-',
+            'keperluan' => $r->keperluan ?? '-',
+            'tanggal' => $r->tanggal->format('d/m/Y'),
+            'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
+            'tanggal_raw' => $r->tanggal,
+            'waktu' => $r->jam_range,
+            'status' => $r->status,
+            'created_at' => $r->created_at,
+            'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+            // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+            'detail' => ReservationDetail::room($r, 'RM-' . $r->id, ['cancel' => 'request']),
+            'jumlah_peserta' => $r->jumlah_peserta,
+            'konsumsi' => $r->konsumsi,
+            'nama_pic' => $r->nama_pic,
+            'no_telp_pic' => $r->no_telp_pic,
+            'divisi_pic' => $r->divisi_pic,
+            'can_cancel' => true,
+            'broadcast' => null,
+            'zoom_link' => null,
+        ];
+    }
+
+    private function zoomRow(ZoomReservation $r): array
+    {
+        return [
+            'id' => 'ZM-' . $r->id,
+            'raw_id' => $r->id,
+            'jenis' => 'zoom',
+            'jenis_label' => 'Breakout Room Zoom',
+            'ruangan' => 'Ruang ' . $r->room_number,
+            'keperluan' => $r->nama_agenda ?? '-',
+            'tanggal' => $r->tanggal->format('d/m/Y'),
+            'tanggal_lengkap' => $r->tanggal->translatedFormat('d F Y'),
+            'tanggal_raw' => $r->tanggal,
+            'waktu' => $r->jam_range,
+            'status' => $r->status,
+            'created_at' => $r->created_at,
+            'created_at_label' => $r->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+            // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+            'detail' => ReservationDetail::zoom($r, 'ZM-' . $r->id, ['cancel' => 'request']),
+            'jumlah_peserta' => null,
+            'konsumsi' => null,
+            'nama_pic' => $r->nama_pic,
+            'no_telp_pic' => $r->no_telp_pic,
+            'divisi_pic' => $r->divisi_pic,
+            'can_cancel' => true,
+            'broadcast' => $r->broadcast_text,
+            'zoom_link' => ZoomReservation::ZOOM_LINK,
+        ];
+    }
+
+    private function formRow(AttendanceForm $f): array
+    {
+        return [
+            'id' => 'FM-' . $f->id,
+            'raw_id' => $f->id,
+            'jenis' => 'form',
+            'jenis_label' => 'Form Kehadiran',
+            'ruangan' => $f->tempat ?? '-',
+            // Kolom keperluan untuk form diisi dari atribut rapat/agenda form.
+            'keperluan' => $f->rapat_pertemuan ?? '-',
+            'tanggal' => $f->created_at->format('d/m/Y'),
+            'tanggal_lengkap' => $f->created_at->translatedFormat('d F Y'),
+            'tanggal_raw' => $f->created_at,
+            'waktu' => $f->expires_at ? 'Kedaluwarsa ' . $f->expires_at->format('d/m/Y H:i') : '-',
+            'status' => $f->isExpired() ? 'selesai' : 'mendatang',
+            'created_at' => $f->created_at,
+            'created_at_label' => $f->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+            // Data modal detail bersama (sama dengan halaman Semua Pemesanan).
+            'detail' => ReservationDetail::form($f, 'FM-' . $f->id),
+            'jumlah_peserta' => null,
+            'konsumsi' => null,
+            'nama_pic' => null,
+            'no_telp_pic' => null,
+            'divisi_pic' => $f->divisi_pic,
+            'can_cancel' => false,
+            'detail_url' => route('attendance.show', $f->id),
+
+            // Detail pembuatan form, ditampilkan di modal "Lihat Detail"
+            // pada dashboard (bukan navigasi ke halaman respons).
+            'form_pic' => $f->pic,
+            'form_divisi_pic' => $f->divisi_pic,
+            'form_tempat' => $f->tempat,
+            'form_rapat' => $f->rapat_pertemuan,
+            'form_expires_label' => $f->expires_at ? $f->expires_at->translatedFormat('d F Y, H:i') . ' WIB' : '-',
+            'form_link' => route('attendance.public', $f->uuid),
+        ];
     }
 
     /*

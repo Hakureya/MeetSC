@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\SyncsExpiredStatuses;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ZoomReservation extends Model
 {
-    use HasFactory;
+    use HasFactory, SyncsExpiredStatuses;
 
     /** Link Zoom tetap yang dipakai semua breakout room (dipakai halaman sukses & Dashboard). */
     public const MEETING_URL = 'https://zoom.us/j/5639933613?pwd=ck1LVi9vQ2owcmRKUGdGNW5Gb0VMZz09';
@@ -72,25 +73,5 @@ Link :
 
 Demikian kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terimakasih
 TEXT;
-    }
-
-    /**
-     * Tandai otomatis reservasi "mendatang" yang jam selesainya sudah lewat menjadi "selesai".
-     * Dipanggil di awal controller yang menampilkan data reservasi, supaya statusnya selalu
-     * mutakhir setiap kali halaman dibuka — tanpa perlu scheduler/cron terpisah.
-     */
-    public static function syncExpiredStatuses(): void
-    {
-        $now = now();
-
-        static::where('status', 'mendatang')
-            ->where(function ($query) use ($now) {
-                $query->whereDate('tanggal', '<', $now->toDateString())
-                    ->orWhere(function ($q) use ($now) {
-                        $q->whereDate('tanggal', $now->toDateString())
-                          ->where('jam_selesai', '<=', $now->format('H:i:s'));
-                    });
-            })
-            ->update(['status' => 'selesai']);
     }
 }

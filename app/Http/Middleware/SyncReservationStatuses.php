@@ -6,6 +6,7 @@ use App\Models\RoomReservation;
 use App\Models\ZoomReservation;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -13,16 +14,24 @@ use Symfony\Component\HttpFoundation\Response;
  * reservasi "mendatang" tidak akan pernah otomatis berubah menjadi "selesai" hanya
  * karena jamnya sudah lewat — kecuali ada yang membuka halaman.
  *
- * Middleware ini menjalankan pengecekan tersebut di setiap request halaman web:
- * begitu ada yang membuka web, seluruh reservasi "mendatang" yang jam selesainya
- * sudah lewat langsung ditandai "selesai" sebelum halaman dirender.
+ * Middleware ini menjalankan pengecekan tersebut dari request halaman web. Agar tidak
+ * menjalankan 2 query UPDATE (yang memindai seluruh tabel) di SETIAP request, pengecekan
+ * dibatasi paling sering sekali per INTERVAL detik: request yang datang di antaranya
+ * cukup membaca satu kunci cache.
  */
 class SyncReservationStatuses
 {
+    /** Jeda minimum (detik) antar dua kali sinkronisasi status. */
+    private const INTERVAL = 60;
+
     public function handle(Request $request, Closure $next): Response
     {
-        RoomReservation::syncExpiredStatuses();
-        ZoomReservation::syncExpiredStatuses();
+        // Cache::add() hanya mengembalikan true bila kuncinya belum ada (atau sudah kedaluwarsa),
+        // jadi hanya satu request per INTERVAL yang benar-benar menjalankan sinkronisasi.
+        if (Cache::add('reservation-status-sync', true, self::INTERVAL)) {
+            RoomReservation::syncExpiredStatuses();
+            ZoomReservation::syncExpiredStatuses();
+        }
 
         return $next($request);
     }
