@@ -13,7 +13,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-brand-50 font-sans text-slate-900">
+<body class="min-h-screen font-sans text-slate-900 bg-brand-50 bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url('{{ asset('storage/images/background.png') }}')">
     <div class="mx-auto flex min-h-screen max-w-[1600px]">
         <x-app.sidebar />
 
