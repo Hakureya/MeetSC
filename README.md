@@ -1,58 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MeetSC
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi web untuk **memesan ruang rapat fisik** dan **breakout room Zoom**, membuat **form kehadiran** dengan tautan publik, serta memantau seluruh pemesanan (khusus admin).
 
-## About Laravel
+Dibangun dengan Laravel 13, Blade, Tailwind CSS 4, dan Laravel Reverb (WebSocket) untuk pembaruan jadwal Zoom secara real time.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+> Dokumentasi lengkap (aturan bisnis, route, struktur data, realtime, deployment) ada di [`docs/DOKUMENTASI.md`](docs/DOKUMENTASI.md).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Fitur
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| Fitur | Siapa | Keterangan |
+|---|---|---|
+| Landing page | Publik | Status tiap ruang rapat (sedang dipakai / tersedia) dan jumlah breakout room Zoom yang kosong |
+| Dashboard | Login | Reservasi hari ini, riwayat reservasi + form kehadiran milik sendiri (cari, filter, urut, pagination), ajukan pembatalan |
+| Ruang Meeting | Login | Lihat jadwal per tanggal, pesan ruang (termasuk ruang gabungan) |
+| Breakout Room Zoom | Login | Tabel jadwal Ruang 1–9 yang ter-update real time, pesan breakout room, salin teks undangan |
+| Form Kehadiran | Login | Buat form dengan kolom kustom, bagikan tautan publik, lihat respons, ekspor PDF/Word |
+| Semua Pemesanan | Admin | Seluruh reservasi + form dari semua akun, filter, batalkan reservasi |
+| Manajemen User | Admin | Tambah/ubah/hapus user, aktif/nonaktifkan, reset kata sandi |
 
-## Learning Laravel
+## Kebutuhan
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP **8.3+** dengan ekstensi umum Laravel (mbstring, xml, curl, zip, PDO sesuai database)
+- Composer
+- Node.js + npm
+- MySQL (produksi) atau SQLite (pengembangan)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalasi cepat
 
 ```bash
-composer require laravel/boost --dev
+git clone <url-repo> meetsc && cd meetsc
 
-php artisan boost:install
+composer setup          # install dependensi, buat .env, key:generate, migrate, npm install, npm run build
+php artisan db:seed     # akun admin awal + 10 ruang rapat
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Skrip `composer setup` memakai `.env.example` (default SQLite). Untuk MySQL, ubah `DB_*` di `.env` **sebelum** `migrate`.
 
-## Contributing
+> **Keamanan:** seeder membuat akun admin `admin@plnsc.co.id` dengan kata sandi `password`.
+> **Segera ganti** kata sandi ini (menu Manajemen User → Reset Password) sebelum aplikasi dipakai di luar mesin lokal.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Menjalankan (pengembangan)
 
-## Code of Conduct
+```bash
+composer dev            # menjalankan proses pengembangan (php artisan dev)
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+atau manual, di terminal terpisah:
 
-## Security Vulnerabilities
+```bash
+php artisan serve               # http://localhost:8000
+npm run dev                     # Vite
+php artisan reverb:start        # WebSocket untuk jadwal Zoom real time
+php artisan storage:link        # sekali saja, agar gambar ruangan tampil
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Tanpa Reverb, halaman jadwal Zoom tetap berfungsi: ia memperbarui diri tiap 60 detik (polling).
 
-## License
+## Menjalankan test
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+composer test
+```
+
+## Struktur singkat
+
+```
+app/
+  Http/Controllers/     Dashboard, Landing, RoomReservation, ZoomReservation, Schedule,
+                        AttendanceForm, MyReservations, Admin/*, Auth/*
+  Http/Middleware/      SyncReservationStatuses (mendatang -> selesai otomatis)
+  Models/               User, Room, RoomReservation, ZoomReservation, AttendanceForm, AttendanceResponse
+  Support/              TimeSlots, KonsumsiOptions, ReservationDetail, Attendance/AttendanceWordDocument
+  Events/               ZoomRoomsUpdated (broadcast Reverb)
+resources/views/        Blade (dashboard, reservations, schedule, attendance, admin, landing)
+routes/                 web.php, channels.php
+database/               migrations, seeders
+tests/Feature/          RoomReservationChangesTest, ScheduleTest, EfficiencyTest
+```
+
+## Sebelum push ke GitHub
+
+`.gitignore` bawaan hanya mengabaikan `.env`. Tambahkan baris berikut agar file sensitif/lokal tidak ikut ter-commit:
+
+```gitignore
+.env.*
+!.env.example
+/meetsc
+/database/*.sqlite
+```
+
+Lalu cek dengan `git status` bahwa `.env.realbak`, `.env.realbak2`, dan file database `meetsc` (SQLite) tidak muncul. Jika sudah pernah ter-commit, hapus dari riwayat dan **ganti semua kunci/kata sandi** yang ada di dalamnya.
