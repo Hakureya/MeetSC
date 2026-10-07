@@ -31,13 +31,16 @@ class AttendanceFormController extends Controller
             'divisi_pic' => 'required|string|max:255',
             'tempat' => 'required|string|max:255',
             'rapat_pertemuan' => 'required|string|max:255',
-            'expires_at' => 'required|date',
+            'expires_at' => 'required|date|after:now',
             'fields' => 'required|array|min:1',
             'fields.*.nama' => 'required|string|max:100',
             'fields.*.tipe' => 'required|in:text,number,email,date,textarea',
             'fields.*.required' => 'nullable|boolean',
         ], [
             'divisi_pic.required' => 'Divisi PIC wajib diisi.',
+            'expires_at.required' => 'Waktu kedaluwarsa wajib diisi.',
+            'expires_at.date' => 'Format waktu tidak valid.',
+            'expires_at.after' => 'Pilih waktu yang masih akan datang.',
         ]);
 
         // Normalisasi checkbox "required" (kalau tidak dicentang, key-nya tidak terkirim sama sekali).
