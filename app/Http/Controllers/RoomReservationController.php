@@ -117,6 +117,7 @@ class RoomReservationController extends Controller
         ], [
             'divisi_pic.required' => 'Divisi PIC wajib diisi.',
             'konsumsi_lainnya.required_if' => 'Isi konsumsi lainnya terlebih dahulu.',
+            'tanggal.after_or_equal' => 'Tanggal tidak boleh sebelum hari ini.',
         ]);
 
         // Bila memilih "Other", nilai yang disimpan adalah teks yang diketik pemesan.
