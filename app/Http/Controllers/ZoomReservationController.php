@@ -37,6 +37,7 @@ class ZoomReservationController extends Controller
             'room_number' => 'required|integer|between:1,9',
         ], [
             'divisi_pic.required' => 'Divisi PIC wajib diisi.',
+            'tanggal.after_or_equal' => 'Tanggal tidak boleh sebelum hari ini.',
         ]);
 
         // Validasi rentang slot (minimal 2 slot),
