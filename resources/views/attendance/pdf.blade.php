@@ -3,10 +3,27 @@
 
 <head>
     <meta charset="utf-8">
+    
+    @php
+        $letterheadPath = public_path('storage/images/kop-surat.png');
+        $hasLetterhead = is_file($letterheadPath) && is_readable($letterheadPath);
+
+        // Gambar disematkan langsung ke HTML (data URI), bukan lewat path file.
+        // Dengan begitu dompdf tidak perlu mengakses file di disk, sehingga kop
+        // tetap tampil walau "chroot" dompdf tidak mencakup folder gambar
+        // (misalnya public/storage adalah symlink ke luar folder proyek).
+        $letterheadSrc = $hasLetterhead
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($letterheadPath))
+            : null;
+
+        $mTop = $hasLetterhead ? 85 : 20;      // pt
+        $mBottom = $hasLetterhead ? 100 : 20;  // pt
+        $mSide = $hasLetterhead ? 50 : 20;     // pt
+    @endphp
 
     <style>
         @page {
-            margin: 20px;
+            margin: {{ $mTop }}pt {{ $mSide }}pt {{ $mBottom }}pt {{ $mSide }}pt;
         }
 
         body {
@@ -15,6 +32,20 @@
             color: #000;
             margin: 0;
             padding: 0;
+        }
+
+        /* ========================================
+           KOP SURAT (GAMBAR A4 PENUH DI BELAKANG TEKS)
+           position: fixed => diulang otomatis di setiap halaman.
+           Offset negatif = margin halaman, agar gambar menempel ke tepi kertas.
+        ======================================== */
+        .letterhead {
+            position: fixed;
+            top: -{{ $mTop }}pt;
+            left: -{{ $mSide }}pt;
+            width: 595.28pt;
+            height: 841.89pt;
+            z-index: -1;
         }
 
         table {
@@ -119,6 +150,14 @@
 </head>
 
 <body>
+
+    {{-- =====================================================
+         KOP SURAT (tampil di setiap halaman)
+    ====================================================== --}}
+    @if ($hasLetterhead)
+        <img class="letterhead" src="{{ $letterheadSrc }}" alt="Kop Surat">
+    @endif
+
 
     {{-- =====================================================
          TABEL HEADER DAN INFORMASI RAPAT
@@ -252,10 +291,11 @@
 
             {{-- =================================================
                  DATA PESERTA
-                 Maksimal 10 peserta
+                 Seluruh peserta ditampilkan; tabel otomatis lanjut
+                 ke halaman berikutnya (header kolom diulang).
             ================================================== --}}
 
-            @forelse ($responses->take(10) as $i => $response)
+            @forelse ($responses as $i => $response)
 
                 <tr>
 
