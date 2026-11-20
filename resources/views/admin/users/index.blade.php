@@ -77,7 +77,7 @@
 
                 <div>
                     <label class="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                        Divisi / Unit
+                        Divisi
                     </label>
                     <select name="divisi" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 shadow-sm">
                         <option value="">Semua Divisi</option>
@@ -270,7 +270,7 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi / Unit <span class="text-red-500">*</span></label>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi <span class="text-red-500">*</span></label>
                     <input type="text" name="divisi" required placeholder="Contoh: PDSI"
                            class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
@@ -345,7 +345,7 @@
             </div>
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi / Unit</label>
+                    <label class="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Divisi</label>
                     <input type="text" name="divisi" id="edit_divisi" required
                            class="w-full border border-gray-300 rounded-lg text-sm px-3 py-2 outline-none transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>

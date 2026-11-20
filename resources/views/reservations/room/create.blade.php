@@ -71,11 +71,11 @@
                             type="text" 
                             name="divisi_pic" 
                             value="{{ old('divisi_pic') }}" 
-                            placeholder="Contoh: Perencanaan dan Pengembangan Bisnis" 
+                            placeholder="Masukkan Divisi PIC" 
                             required
                             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                         >
-                        <p class="mt-1 text-xs text-gray-400">Divisi atau unit kerja penanggung jawab rapat.</p>
+                        <p class="mt-1 text-xs text-gray-400">Divisi penanggung jawab rapat.</p>
                     </div>
 
                     <div>

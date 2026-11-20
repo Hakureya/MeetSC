@@ -77,7 +77,7 @@ Demikian kami sampaikan, atas perhatian dan kerjasamanya kami ucapkan terimakasi
                 <span class="font-medium text-gray-800">{{ $reservation->no_telp_pic }}</span>
             </div>
             <div class="flex justify-between">
-                <span class="text-gray-500">Divisi / Unit:</span>
+                <span class="text-gray-500">Divisi:</span>
                 <span class="font-medium text-gray-800">{{ $reservation->divisi_pic ?? '-' }}</span>
             </div>
         </div>
